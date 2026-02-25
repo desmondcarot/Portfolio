@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://desmondcarot.github.io/Portfolio/sitemap.xml
+Sitemap: https://dokyhub.com/sitemap.xml

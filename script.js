@@ -197,5 +197,303 @@ scrollTopBtn.addEventListener('mouseleave', function() {
 });
 
 // ===== Console Message =====
-console.log('%c👋 Welcome to Desmond\'s Portfolio!', 'color: #3b82f6; font-size: 20px; font-weight: bold;');
-console.log('%cLooking for a software engineer? Let\'s connect!', 'color: #8b5cf6; font-size: 14px;');
+console.log('%c✨ Desmond Ong Khai Yang - Portfolio', 'color: #3b82f6; font-size: 18px; font-weight: bold;');
+console.log('%cSoftware Engineer | ASP.NET & Python Developer', 'color: #8b5cf6; font-size: 14px;');
+
+// ===== Easter Egg: Konami Code =====
+let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let konamiIndex = 0;
+
+document.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === konamiCode[konamiIndex].toLowerCase()) {
+        konamiIndex++;
+        if (konamiIndex === konamiCode.length) {
+            activateKonamiMode();
+            konamiIndex = 0;
+        }
+    } else {
+        konamiIndex = 0;
+    }
+});
+
+function activateKonamiMode() {
+    // Create confetti effect
+    for (let i = 0; i < 100; i++) {
+        createConfetti();
+    }
+    
+    // Show message
+    const message = document.createElement('div');
+    message.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 3rem;
+        border-radius: 20px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        z-index: 10000;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: bounceIn 0.6s ease;
+    `;
+    message.innerHTML = '<i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>Easter Egg Found!<br><small style="font-size: 0.8rem; font-weight: normal;">Thanks for exploring</small>';
+    document.body.appendChild(message);
+    
+    setTimeout(() => {
+        message.style.animation = 'fadeOut 0.5s ease';
+        setTimeout(() => message.remove(), 500);
+    }, 3000);
+}
+
+function createConfetti() {
+    const confetti = document.createElement('div');
+    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+    confetti.style.cssText = `
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        left: ${Math.random() * 100}%;
+        top: -10px;
+        opacity: 1;
+        border-radius: 50%;
+        z-index: 9999;
+        pointer-events: none;
+    `;
+    document.body.appendChild(confetti);
+    
+    let pos = -10;
+    let drift = Math.random() * 200 - 100;
+    const fallSpeed = Math.random() * 3 + 2;
+    
+    const fall = setInterval(() => {
+        pos += fallSpeed;
+        confetti.style.top = pos + 'px';
+        confetti.style.left = `calc(${confetti.style.left} + ${drift / 100}px)`;
+        confetti.style.opacity = 1 - (pos / window.innerHeight);
+        
+        if (pos > window.innerHeight) {
+            clearInterval(fall);
+            confetti.remove();
+        }
+    }, 20);
+}
+
+// ===== Fun Click Counter Easter Egg =====
+let logoClickCount = 0;
+const navLogo = document.querySelector('.nav-logo');
+
+navLogo.addEventListener('click', (e) => {
+    e.preventDefault();
+    logoClickCount++;
+    
+    if (logoClickCount === 1) {
+        navLogo.style.animation = 'shake 0.5s ease';
+        setTimeout(() => navLogo.style.animation = '', 500);
+    }
+    
+    if (logoClickCount === 3) {
+        const messages = [
+            '<i class="fas fa-info-circle"></i> Portfolio by Desmond Ong',
+            '<i class="fas fa-code"></i> Built with HTML, CSS, JavaScript',
+            '<i class="fas fa-palette"></i> Custom Design',
+            '<i class="fas fa-check"></i> Thanks for visiting',
+            '<i class="fas fa-star"></i> Achievement: Explorer'
+        ];
+        
+        const bubble = document.createElement('div');
+        bubble.style.cssText = `
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            color: #3b82f6;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 10000;
+            font-weight: 600;
+            animation: bounceIn 0.5s ease;
+        `;
+        bubble.innerHTML = messages[Math.floor(Math.random() * messages.length)];
+        document.body.appendChild(bubble);
+        
+        setTimeout(() => {
+            bubble.style.animation = 'fadeOut 0.5s ease';
+            setTimeout(() => bubble.remove(), 500);
+        }, 2000);
+        logoClickCount = 0;
+    }
+});
+
+// ===== Dynamic Status Messages =====
+const statusMessages = [
+    '<i class="fas fa-map-marker-alt icon-pulse"></i> Based in Petaling Jaya, Kuala Lumpur',
+    '<i class="fas fa-code icon-pulse"></i> Backend Development',
+    '<i class="fas fa-server icon-pulse"></i> API Design & Integration',
+    '<i class="fas fa-robot icon-pulse"></i> AI/ML Solutions',
+    '<i class="fas fa-database icon-pulse"></i> Database Architecture',
+    '<i class="fas fa-cloud icon-pulse"></i> Cloud Deployment'
+];
+
+// Randomly update fun fact message
+setInterval(() => {
+    const funFact = document.querySelector('.hero-fun-fact');
+    if (funFact && Math.random() > 0.7) {
+        const randomMessage = statusMessages[Math.floor(Math.random() * statusMessages.length)];
+        funFact.style.opacity = '0';
+        setTimeout(() => {
+            funFact.innerHTML = randomMessage;
+            funFact.style.opacity = '1';
+        }, 300);
+    }
+}, 10000);
+
+// Add required CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes bounceIn {
+        0% { transform: translate(-50%, -50%) scale(0); }
+        50% { transform: translate(-50%, -50%) scale(1.1); }
+        100% { transform: translate(-50%, -50%) scale(1); }
+    }
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+`;
+document.head.appendChild(style);
+
+// ===== Chat Functionality =====
+const chatInput = document.getElementById('chat-input');
+const chatSendBtn = document.getElementById('chat-send-btn');
+const chatMessages = document.getElementById('chat-messages');
+const typingIndicator = document.getElementById('typing-indicator');
+
+// Sample bot responses (simulated)
+const botResponses = [
+    "That's a great question! I specialize in ASP.NET (C#) and Python development, focusing on building robust backend services and RESTful APIs.",
+    "I have experience with IoT automation solutions and AI-driven projects, including RAG-powered chatbots that reduced support workload by 50%.",
+    "I'm currently working at Mon Solution Sdn Bhd as a Software Engineer, where I develop backend services and implement innovative solutions.",
+    "My technical skills include C#, Python, Java, SQL, and frameworks like ASP.NET, .NET, FastAPI, and Flask.",
+    "I graduated from Tunku Abdul Rahman University of Management & Technology with a degree in Software Systems Development.",
+    "I'm based in Petaling Jaya, Kuala Lumpur, and I'm passionate about building scalable, maintainable code that solves complex technical challenges.",
+    "Feel free to reach out via email at desmondoky2001@gmail.com or check out my GitHub at @desmondcarot!",
+    "I've worked on modernizing legacy systems, developing MVPs, and implementing enterprise-grade backend services.",
+    "My approach focuses on writing clean, maintainable code while staying current with emerging technologies in AI/ML and backend development."
+];
+
+let isBotResponding = false;
+
+// Function to add a message to the chat
+function addMessage(text, isUser = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+    
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'message-avatar';
+    avatarDiv.innerHTML = `<i class="fas fa-${isUser ? 'user' : 'robot'}"></i>`;
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    const p = document.createElement('p');
+    p.textContent = text;
+    contentDiv.appendChild(p);
+    
+    messageDiv.appendChild(avatarDiv);
+    messageDiv.appendChild(contentDiv);
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Function to show typing indicator
+function showTypingIndicator() {
+    typingIndicator.style.display = 'flex';
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Function to hide typing indicator
+function hideTypingIndicator() {
+    typingIndicator.style.display = 'none';
+}
+
+// Function to disable chat input
+function disableChatInput() {
+    chatInput.disabled = true;
+    chatSendBtn.disabled = true;
+    isBotResponding = true;
+}
+
+// Function to enable chat input
+function enableChatInput() {
+    chatInput.disabled = false;
+    chatSendBtn.disabled = false;
+    isBotResponding = false;
+    chatInput.focus();
+}
+
+// Function to simulate bot response
+function simulateBotResponse() {
+    disableChatInput();
+    showTypingIndicator();
+    
+    // Simulate thinking time (1.5-3 seconds)
+    const thinkingTime = Math.random() * 1500 + 1500;
+    
+    setTimeout(() => {
+        hideTypingIndicator();
+        const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+        addMessage(randomResponse, false);
+        enableChatInput();
+    }, thinkingTime);
+}
+
+// Function to send message
+function sendMessage() {
+    const messageText = chatInput.value.trim();
+    
+    if (messageText === '' || isBotResponding) {
+        return;
+    }
+    
+    // Add user message
+    addMessage(messageText, true);
+    chatInput.value = '';
+    
+    // Simulate bot response after a short delay
+    setTimeout(() => {
+        simulateBotResponse();
+    }, 500);
+}
+
+// Event listeners for chat
+chatSendBtn.addEventListener('click', sendMessage);
+
+chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !isBotResponding) {
+        sendMessage();
+    }
+});
+
+// Observe chat section
+const chatSection = document.querySelector('.chat-section');
+if (chatSection) {
+    chatSection.style.opacity = '0';
+    chatSection.style.transform = 'translateY(20px)';
+    chatSection.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(chatSection);
+}

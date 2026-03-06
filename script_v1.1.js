@@ -477,10 +477,11 @@ function sendMessage() {
     $.ajax({
         type: "POST",
         url: `${baseUrl}/chat/message`,
-        data: {
+        data: JSON.stringify({
             chat_code: chatId,
             message: messageText
-        },
+        }),
+        contentType: "application/json",
         dataType: "json",
         success: function (response) {
             hideTypingIndicator();

@@ -999,6 +999,31 @@ body {
     word-wrap: break-word;
 }
 
+.message-content a {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.bot-message .message-content a {
+    color: var(--primary-color);
+}
+
+.bot-message .message-content a:hover {
+    color: var(--secondary-color);
+}
+
+.user-message .message-content a {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration-color: rgba(255, 255, 255, 0.7);
+}
+
+.user-message .message-content a:hover {
+    color: white;
+    text-decoration-color: white;
+}
+
 .typing-indicator {
     display: flex;
     gap: 0.5rem;

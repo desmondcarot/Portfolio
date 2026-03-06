@@ -417,7 +417,24 @@ function addMessage(text, isUser = false) {
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
     const p = document.createElement('p');
-    p.textContent = text;
+    
+    // Escape HTML to prevent XSS
+    const escapedText = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    
+    const withLinks = escapedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+        const fullUrl = url.startsWith('http://') || url.startsWith('https://') ? url : 'https://' + url;
+        return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+    });
+    
+    // Replace newlines with <br> tags
+    const formattedText = withLinks.replace(/\n/g, '<br>');
+    
+    p.innerHTML = formattedText;
     contentDiv.appendChild(p);
     
     messageDiv.appendChild(avatarDiv);

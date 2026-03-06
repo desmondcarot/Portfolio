@@ -382,19 +382,26 @@ const chatInput = document.getElementById('chat-input');
 const chatSendBtn = document.getElementById('chat-send-btn');
 const chatMessages = document.getElementById('chat-messages');
 const typingIndicator = document.getElementById('typing-indicator');
+const baseUrl = 'https://api.dokyhub.com';
+let chatId = null;
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial bot greeting
+    addMessage('Hello! I\'m Desmond\'s portfolio assistant. How can I assist you today?');
 
-// Sample bot responses (simulated)
-const botResponses = [
-    "That's a great question! I specialize in ASP.NET (C#) and Python development, focusing on building robust backend services and RESTful APIs.",
-    "I have experience with IoT automation solutions and AI-driven projects, including RAG-powered chatbots that reduced support workload by 50%.",
-    "I'm currently working at Mon Solution Sdn Bhd as a Software Engineer, where I develop backend services and implement innovative solutions.",
-    "My technical skills include C#, Python, Java, SQL, and frameworks like ASP.NET, .NET, FastAPI, and Flask.",
-    "I graduated from Tunku Abdul Rahman University of Management & Technology with a degree in Software Systems Development.",
-    "I'm based in Petaling Jaya, Kuala Lumpur, and I'm passionate about building scalable, maintainable code that solves complex technical challenges.",
-    "Feel free to reach out via email at desmondoky2001@gmail.com or check out my GitHub at @desmondcarot!",
-    "I've worked on modernizing legacy systems, developing MVPs, and implementing enterprise-grade backend services.",
-    "My approach focuses on writing clean, maintainable code while staying current with emerging technologies in AI/ML and backend development."
-];
+    $.ajax({
+        type: "POST",
+        url: `${baseUrl}/chat/new`,
+        dataType: "json",
+        success: function (response) {
+            chatId = response.chat_code;
+            console.log('Chat session initialized:', chatId);
+        },
+        error: function (xhr, status, error) {
+            console.error('Failed to initialize chat:', error);
+            addMessage('Sorry, I\'m having trouble connecting. Please try again later.', false);
+        }
+    });
+});
 
 let isBotResponding = false;
 
@@ -420,64 +427,73 @@ function addMessage(text, isUser = false) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Function to show typing indicator
+
 function showTypingIndicator() {
     typingIndicator.style.display = 'flex';
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Function to hide typing indicator
+
 function hideTypingIndicator() {
     typingIndicator.style.display = 'none';
 }
 
-// Function to disable chat input
-function disableChatInput() {
-    chatInput.disabled = true;
-    chatSendBtn.disabled = true;
-    isBotResponding = true;
+
+function chatDisabled(isDisabled) {
+    chatInput.disabled = isDisabled;
+    chatSendBtn.disabled = isDisabled;
+    isBotResponding = isDisabled;
+
+    if(!isDisabled) {
+        chatInput.focus();
+    }
 }
 
-// Function to enable chat input
-function enableChatInput() {
-    chatInput.disabled = false;
-    chatSendBtn.disabled = false;
-    isBotResponding = false;
-    chatInput.focus();
-}
 
-// Function to simulate bot response
-function simulateBotResponse() {
-    disableChatInput();
-    showTypingIndicator();
-    
-    // Simulate thinking time (1.5-3 seconds)
-    const thinkingTime = Math.random() * 1500 + 1500;
-    
-    setTimeout(() => {
-        hideTypingIndicator();
-        const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
-        addMessage(randomResponse, false);
-        enableChatInput();
-    }, thinkingTime);
-}
 
 // Function to send message
 function sendMessage() {
     const messageText = chatInput.value.trim();
     
+    // Validate message
     if (messageText === '' || isBotResponding) {
         return;
     }
     
-    // Add user message
-    addMessage(messageText, true);
-    chatInput.value = '';
+    // Check if chat session is initialized
+    if (!chatId) {
+        addMessage('Please wait, connecting to chat service...', false);
+        return;
+    }
     
-    // Simulate bot response after a short delay
-    setTimeout(() => {
-        simulateBotResponse();
-    }, 500);
+    // Add user message to chat
+    addMessage(messageText, true);
+    
+    // Clear input and disable chat
+    chatInput.value = '';
+    chatDisabled(true);
+    showTypingIndicator();
+    
+    $.ajax({
+        type: "POST",
+        url: `${baseUrl}/chat/message`,
+        data: {
+            chat_code: chatId,
+            message: messageText
+        },
+        dataType: "json",
+        success: function (response) {
+            hideTypingIndicator();
+            addMessage(response.response, false);
+            chatDisabled(false);
+        },
+        error: function (xhr, status, error) {
+            hideTypingIndicator();
+            console.error('Chat error:', error);
+            addMessage('Sorry, I encountered an error. Please try again.', false);
+            chatDisabled(false);
+        }
+    });
 }
 
 // Event listeners for chat

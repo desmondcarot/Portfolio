@@ -1049,6 +1049,27 @@ body {
     text-decoration-color: white;
 }
 
+/* Markdown formatting */
+.message-content code {
+    background-color: rgba(0, 0, 0, 0.08);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.user-message .message-content code {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.message-content strong {
+    font-weight: 700;
+}
+
+.message-content em {
+    font-style: italic;
+}
+
 .typing-indicator {
     display: flex;
     gap: 0.5rem;

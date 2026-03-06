@@ -454,20 +454,32 @@ function addMessage(text, isUser = false) {
     const p = document.createElement('p');
     
     // Escape HTML to prevent XSS
-    const escapedText = text
+    let escapedText = text
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
     
-    const withLinks = escapedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+    // Parse markdown links: [text](url)
+    escapedText = escapedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
         const fullUrl = url.startsWith('http://') || url.startsWith('https://') ? url : 'https://' + url;
         return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
     });
     
+    // Parse inline code: `code`
+    escapedText = escapedText.replace(/`([^`]+)`/g, '<code>$1</code>');
+    
+    // Parse bold: **text** or __text__
+    escapedText = escapedText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    escapedText = escapedText.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+    
+    // Parse italic: *text* or _text_ (but not in URLs or already processed)
+    escapedText = escapedText.replace(/(?<!\*)\*(?!\*)([^*]+)\*(?!\*)/g, '<em>$1</em>');
+    escapedText = escapedText.replace(/(?<!_)_(?!_)([^_]+)_(?!_)/g, '<em>$1</em>');
+    
     // Replace newlines with <br> tags
-    const formattedText = withLinks.replace(/\n/g, '<br>');
+    const formattedText = escapedText.replace(/\n/g, '<br>');
     
     p.innerHTML = formattedText;
     contentDiv.appendChild(p);

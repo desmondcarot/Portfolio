@@ -578,3 +578,54 @@ if (chatSection) {
     chatSection.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     observer.observe(chatSection);
 }
+
+// ===== Floating Chat Button Functionality =====
+const floatingChatBtn = document.getElementById('floating-chat-btn');
+
+// Show/hide floating button based on scroll position
+window.addEventListener('scroll', () => {
+    if (floatingChatBtn) {
+        // Hide button when user is already in the chat section
+        const chatSectionTop = chatSection?.offsetTop || 0;
+        const chatSectionBottom = chatSectionTop + (chatSection?.offsetHeight || 0);
+        const scrollPosition = window.pageYOffset + window.innerHeight;
+        
+        if (window.pageYOffset > 300 && 
+            (window.pageYOffset < chatSectionTop - 100 || scrollPosition > chatSectionBottom + 100)) {
+            floatingChatBtn.style.opacity = '1';
+            floatingChatBtn.style.visibility = 'visible';
+            floatingChatBtn.style.pointerEvents = 'auto';
+        } else {
+            floatingChatBtn.style.opacity = '0';
+            floatingChatBtn.style.visibility = 'hidden';
+            floatingChatBtn.style.pointerEvents = 'none';
+        }
+    }
+});
+
+// Remove "New!" badge after first click (stored in localStorage)
+if (floatingChatBtn) {
+    const chatBadge = floatingChatBtn.querySelector('.chat-badge');
+    const hasClickedChat = localStorage.getItem('chat_clicked');
+    
+    // Hide badge if user has clicked before
+    if (hasClickedChat && chatBadge) {
+        chatBadge.style.display = 'none';
+    }
+    
+    // Remove badge on click
+    floatingChatBtn.addEventListener('click', () => {
+        if (chatBadge) {
+            chatBadge.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                chatBadge.style.display = 'none';
+            }, 300);
+            localStorage.setItem('chat_clicked', 'true');
+        }
+    });
+    
+    // Initial state
+    floatingChatBtn.style.opacity = '0';
+    floatingChatBtn.style.visibility = 'hidden';
+    floatingChatBtn.style.pointerEvents = 'none';
+}

@@ -82,7 +82,6 @@
                 <li class="nav-item"><a href="#experience" class="nav-link">Experience</a></li>
                 <li class="nav-item"><a href="#education" class="nav-link">Education</a></li>
                 <li class="nav-item"><a href="#skills" class="nav-link">Skills</a></li>
-                <li class="nav-item"><a href="#chat" class="nav-link">Chat</a></li>
                 <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
             </ul>
             <div class="hamburger" id="hamburger">
@@ -104,8 +103,7 @@
                 that solves complex technical challenges.
             </p>
             <div class="hero-buttons">
-                <a href="#chat" class="btn btn-primary"><i class="fas fa-comments"></i> Chat with AI</a>
-                <a href="#contact" class="btn btn-secondary"><i class="fas fa-envelope"></i> Get In Touch</a>
+                <a href="#contact" class="btn btn-primary"><i class="fas fa-envelope"></i> Get In Touch</a>
                 <a href="#experience" class="btn btn-secondary"><i class="fas fa-briefcase"></i> View Experience</a>
             </div>
             <p class="hero-fun-fact"><i class="fas fa-map-marker-alt icon-pulse"></i> Based in Petaling Jaya, Kuala Lumpur</p>
@@ -177,6 +175,9 @@
                 <div class="timeline-item">
                     <div class="timeline-dot"></div>
                     <div class="timeline-content">
+                        <div class="company-logo">
+                            <img src="img/mon_logo.png" alt="Mon Solution Sdn Bhd Logo">
+                        </div>
                         <div class="timeline-header">
                             <h3>Software Engineer</h3>
                             <span class="company">Mon Solution Sdn Bhd</span>
@@ -205,6 +206,9 @@
                 <div class="timeline-item">
                     <div class="timeline-dot"></div>
                     <div class="timeline-content">
+                        <div class="company-logo">
+                            <img src="img/work_at_cloud_logo.png" alt="Cloud Sdn Bhd Logo">
+                        </div>
                         <div class="timeline-header">
                             <h3>Project Managing and Analyst Intern</h3>
                             <span class="company">Cloud Sdn Bhd</span>
@@ -302,42 +306,6 @@
         </div>
     </section>
 
-    <!-- Chat Section -->
-    <section class="chat-section" id="chat">
-        <div class="container">
-            <h2 class="section-title">Chat with Me</h2>
-            <p class="chat-intro">
-                Have questions about my experience or skills? Try the chatbot below! (version 0.8.1)
-            </p>
-            <div class="chat-disclaimer">
-                <i class="fas fa-info-circle"></i>
-                <span>This chatbot is under constant improvement. AI can make mistakes, so please verify important information.</span>
-            </div>
-            <div class="chat-container">
-                <div class="chat-messages" id="chat-messages">
-
-                </div>
-                <div class="typing-indicator" id="typing-indicator" style="display: none;">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                </div>
-                <div class="chat-input-container">
-                    <input 
-                        type="text" 
-                        class="chat-input" 
-                        id="chat-input" 
-                        placeholder="Type your message..."
-                        autocomplete="off"
-                    >
-                    <button class="chat-send-btn" id="chat-send-btn">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Contact Section -->
     <section class="contact" id="contact">
         <div class="container">
@@ -377,12 +345,6 @@
             </div>
         </div>
     </footer>
-
-    <!-- Floating Chat Button -->
-    <a href="#chat" class="floating-chat-btn" id="floating-chat-btn" aria-label="Chat with AI">
-        <i class="fas fa-comments"></i>
-        <span class="chat-badge">New!</span>
-    </a>
 
     <script src="https://code.jquery.com/jquery-4.0.0.min.js" integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script>
     <script src="script_v1.2.0.js?v=20260307"></script>

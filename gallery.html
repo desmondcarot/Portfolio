@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alex Rivera | Creative Portfolio</title>
+    <link rel="stylesheet" href="gallery.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">AR</div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#portfolio" class="nav-link">Portfolio</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Hi, I'm <span class="highlight">Alex Rivera</span></h1>
+            <p class="hero-subtitle">Creative Director & Visual Storyteller</p>
+            <p class="hero-description">
+                Crafting compelling visual narratives through photography, videography, and digital art.
+            </p>
+            <div class="hero-buttons">
+                <a href="#portfolio" class="btn btn-primary">View My Work</a>
+                <a href="#contact" class="btn btn-secondary">Get In Touch</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="profile-circle">
+                <img src="assets/headshot.JPEG" alt="Alex Rivera Profile Photo">
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">About Me</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p class="about-intro">
+                        I'm a passionate visual creator with over 8 years of experience in digital media production.
+                    </p>
+                    <p>
+                        My work spans across various disciplines including commercial videography, 
+                        documentary filmmaking, and creative photography. I believe in the power of 
+                        visual storytelling to inspire, educate, and connect people across cultures.
+                    </p>
+                    <div class="skills">
+                        <div class="skill-item">
+                            <span class="skill-icon">📹</span>
+                            <h3>Videography</h3>
+                            <p>Commercial & Documentary</p>
+                        </div>
+                        <div class="skill-item">
+                            <span class="skill-icon">📸</span>
+                            <h3>Photography</h3>
+                            <p>Portrait & Landscape</p>
+                        </div>
+                        <div class="skill-item">
+                            <span class="skill-icon">✂️</span>
+                            <h3>Post Production</h3>
+                            <p>Editing & Color Grading</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-stats">
+                    <div class="stat-item">
+                        <h3 class="stat-number">150+</h3>
+                        <p>Projects Completed</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3 class="stat-number">50+</h3>
+                        <p>Happy Clients</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3 class="stat-number">8+</h3>
+                        <p>Years Experience</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="portfolio">
+        <div class="container">
+            <h2 class="section-title">My Work</h2>
+            <p class="section-subtitle">A selection of my recent projects</p>
+            
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="video">Videos</button>
+                <button class="filter-btn" data-filter="photo">Photos</button>
+                <button class="filter-btn" data-filter="commercial">Commercial</button>
+            </div>
+            
+            <div class="gallery-grid" id="gallery">
+                <!-- Portfolio items will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">Let's Work Together</h2>
+            <p class="section-subtitle">Have a project in mind? Let's bring your vision to life.</p>
+            
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="info-item">
+                        <span class="info-icon">📧</span>
+                        <div>
+                            <h3>Email</h3>
+                            <p>alex.rivera@example.com</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">📱</span>
+                        <div>
+                            <h3>Phone</h3>
+                            <p>+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">📍</span>
+                        <div>
+                            <h3>Location</h3>
+                            <p>Los Angeles, CA</p>
+                        </div>
+                    </div>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Instagram</a>
+                        <a href="#" class="social-link">YouTube</a>
+                        <a href="#" class="social-link">LinkedIn</a>
+                        <a href="#" class="social-link">Vimeo</a>
+                    </div>
+                </div>
+                
+                <form class="contact-form">
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" placeholder="Subject">
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Your Message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Alex Rivera. All rights reserved.</p>
+    </footer>
+
+    <!-- Modal for full-screen view -->
+    <div id="modal" class="modal">
+        <span class="close">&times;</span>
+        <div class="modal-content-wrapper">
+            <button class="nav-btn prev-btn">&#10094;</button>
+            <div class="modal-content" id="modalContent"></div>
+            <button class="nav-btn next-btn">&#10095;</button>
+        </div>
+        <div class="modal-info">
+            <h3 id="modalTitle"></h3>
+            <p id="modalDescription"></p>
+            <div class="modal-tags" id="modalTags"></div>
+        </div>
+    </div>
+
+    <script src="gallery.js"></script>
+</body>
+</html>

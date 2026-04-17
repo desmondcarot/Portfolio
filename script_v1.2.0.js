@@ -138,26 +138,29 @@ scrollTopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
 scrollTopBtn.className = 'scroll-to-top';
 scrollTopBtn.style.cssText = `
     position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    bottom: 35px;
+    right: 35px;
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #5AB3C6, #4A90E2);
     color: white;
     border: none;
     cursor: pointer;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 999;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 20px rgba(90, 179, 198, 0.3);
+    font-size: 1.2rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 `;
 
 document.body.appendChild(scrollTopBtn);
 
 window.addEventListener('scroll', () => {
-    if (window.pageYOffset > 300) {
+    if (window.pageYOffset > 400) {
         scrollTopBtn.style.opacity = '1';
         scrollTopBtn.style.visibility = 'visible';
     } else {
@@ -174,15 +177,18 @@ scrollTopBtn.addEventListener('click', () => {
 });
 
 scrollTopBtn.addEventListener('mouseenter', function() {
-    this.style.transform = 'translateY(-5px)';
+    this.style.transform = 'translateY(-8px) rotate(-5deg) scale(1.05)';
+    this.style.boxShadow = '0 12px 30px rgba(90, 179, 198, 0.45)';
 });
 
 scrollTopBtn.addEventListener('mouseleave', function() {
-    this.style.transform = 'translateY(0)';
+    this.style.transform = 'translateY(0) rotate(0) scale(1)';
+    this.style.boxShadow = '0 8px 20px rgba(90, 179, 198, 0.3)';
 });
 
-console.log('%c✨ Desmond Ong Khai Yang - Portfolio', 'color: #3b82f6; font-size: 18px; font-weight: bold;');
-console.log('%cSoftware Engineer | ASP.NET & Python Developer', 'color: #8b5cf6; font-size: 14px;');
+console.log('%c✨ Desmond Ong Khai Yang - Portfolio', 'color: #5AB3C6; font-size: 20px; font-weight: bold;');
+console.log('%cSoftware Engineer | ASP.NET & Python Developer', 'color: #FF9F4A; font-size: 14px; font-weight: 600;');
+console.log('%c🍬 Designed with 90s Apple vibes + modern minimalism', 'color: #A4D65E; font-size: 12px;');
 
 let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 let konamiIndex = 0;
@@ -200,67 +206,49 @@ document.addEventListener('keydown', (e) => {
 });
 
 function activateKonamiMode() {
-    for (let i = 0; i < 100; i++) {
-        createConfetti();
+    console.log('%c🎉 KONAMI CODE ACTIVATED! 🎉', 'color: #FF6B9D; font-size: 24px; font-weight: bold;');
+    
+    // Add rainbow candy effect to all sections
+    const body = document.body;
+    body.style.animation = 'candyRainbow 3s ease-in-out';
+    
+    // Create candy rain
+    for (let i = 0; i < 50; i++) {
+        const candy = document.createElement('div');
+        const candyColors = ['#5AB3C6', '#FF9F4A', '#A4D65E', '#FF6B9D', '#9B59B6'];
+        const symbols = ['🍬', '🍭', '🎨', '✨', '💫', '🌈'];
+        
+        candy.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        candy.style.cssText = `
+            position: fixed;
+            left: ${Math.random() * 100}vw;
+            top: -50px;
+            font-size: ${Math.random() * 30 + 20}px;
+            z-index: 9999;
+            pointer-events: none;
+            animation: candyFall ${Math.random() * 3 + 2}s linear forwards;
+        `;
+        
+        document.body.appendChild(candy);
+        
+        setTimeout(() => candy.remove(), 5000);
     }
     
-    const message = document.createElement('div');
-    message.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2rem 3rem;
-        border-radius: 20px;
-        font-size: 1.5rem;
-        font-weight: bold;
-        z-index: 10000;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        animation: bounceIn 0.6s ease;
-    `;
-    message.innerHTML = '<i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>Easter Egg Found!<br><small style="font-size: 0.8rem; font-weight: normal;">Thanks for exploring</small>';
-    document.body.appendChild(message);
-    
-    setTimeout(() => {
-        message.style.animation = 'fadeOut 0.5s ease';
-        setTimeout(() => message.remove(), 500);
-    }, 3000);
-}
-
-function createConfetti() {
-    const confetti = document.createElement('div');
-    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
-    confetti.style.cssText = `
-        position: fixed;
-        width: 10px;
-        height: 10px;
-        background: ${colors[Math.floor(Math.random() * colors.length)]};
-        left: ${Math.random() * 100}%;
-        top: -10px;
-        opacity: 1;
-        border-radius: 50%;
-        z-index: 9999;
-        pointer-events: none;
-    `;
-    document.body.appendChild(confetti);
-    
-    let pos = -10;
-    let drift = Math.random() * 200 - 100;
-    const fallSpeed = Math.random() * 3 + 2;
-    
-    const fall = setInterval(() => {
-        pos += fallSpeed;
-        confetti.style.top = pos + 'px';
-        confetti.style.left = `calc(${confetti.style.left} + ${drift / 100}px)`;
-        confetti.style.opacity = 1 - (pos / window.innerHeight);
-        
-        if (pos > window.innerHeight) {
-            clearInterval(fall);
-            confetti.remove();
+    // Add CSS animation for candy fall
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes candyFall {
+            to {
+                transform: translateY(100vh) rotate(${Math.random() * 360}deg);
+                opacity: 0;
+            }
         }
-    }, 20);
+        @keyframes candyRainbow {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 let logoClickCount = 0;
@@ -279,7 +267,7 @@ navLogo.addEventListener('click', (e) => {
         const messages = [
             '<i class="fas fa-info-circle"></i> Portfolio by Desmond Ong',
             '<i class="fas fa-code"></i> Built with HTML, CSS, JavaScript',
-            '<i class="fas fa-palette"></i> Custom Design',
+            '<i class="fas fa-palette"></i> 90s Apple + Modern Design',
             '<i class="fas fa-check"></i> Thanks for visiting',
             '<i class="fas fa-star"></i> Achievement: Explorer'
         ];
@@ -287,14 +275,16 @@ navLogo.addEventListener('click', (e) => {
         const bubble = document.createElement('div');
         bubble.style.cssText = `
             position: fixed;
-            top: 80px;
+            top: 90px;
             left: 50%;
             transform: translateX(-50%);
-            background: white;
-            color: #3b82f6;
-            padding: 1rem 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, rgba(90, 179, 198, 0.95), rgba(74, 144, 226, 0.95));
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1.25rem 2rem;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(90, 179, 198, 0.4);
             z-index: 10000;
             font-weight: 600;
             animation: bounceIn 0.5s ease;
@@ -305,7 +295,7 @@ navLogo.addEventListener('click', (e) => {
         setTimeout(() => {
             bubble.style.animation = 'fadeOut 0.5s ease';
             setTimeout(() => bubble.remove(), 500);
-        }, 2000);
+        }, 2500);
         logoClickCount = 0;
     }
 });

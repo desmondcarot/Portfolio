@@ -1,0 +1,36 @@
+# MYF Attendance Summary
+
+- Analysed 15 completed MYF sessions from 04 Jan 2026 to 19 Apr 2026.
+- Average attendance: 13.3 members.
+- Median attendance: 14.0 members.
+- Highest attendance: 17 on 11 Jan 2026 (Vision Planning).
+- Lowest attendance: 7 on 01 Mar 2026 (Firm Foundation).
+- Average attendance when service ended late: 14.8.
+- Average attendance when service was on time: 12.6.
+- Average MYF start time when service ended late: 11:06.
+- Average MYF start time when service was on time: 11:05.
+- Sessions with guests: 2; inferred total guests: 3.
+
+## Most consistent members
+
+- Jin Rong: 15/15 sessions (100%).
+- RJ: 15/15 sessions (100%).
+- Cheryl: 14/15 sessions (93%).
+- Callie: 13/15 sessions (87%).
+- Christopher: 13/15 sessions (87%).
+
+## Output files
+
+- attendance_dashboard.png
+- attendance_heatmap.png
+- attendance_by_event.png
+- cumulative_attendance_over_time.png
+- weekly_session_time.png
+- member_attendance_rate.png
+- attendance_infographic.html
+
+## Notes
+
+- Future placeholder rows were excluded from the statistics.
+- Guest totals use the larger of the numeric guest count and the number of names listed in the Guests column.
+- Sessions marked as No Youth are treated as calendar exceptions rather than attendance failures.

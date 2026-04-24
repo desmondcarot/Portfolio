@@ -28,12 +28,17 @@
 
     * { box-sizing: border-box; }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       padding: 16px;
       background: var(--bg);
       color: var(--text);
       font-family: Consolas, "Courier New", monospace;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .wrap {
@@ -47,7 +52,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
-      align-items: center;
+      align-items: stretch;
       padding: 12px;
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -74,6 +79,35 @@
 
     button, input[type="file"] {
       font: inherit;
+    }
+
+    input[type="file"] {
+      max-width: 100%;
+      cursor: pointer;
+    }
+
+    input[type="file"]::file-selector-button {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      background: #f3f3f3;
+      border-radius: 6px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      margin-right: 8px;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+      background: #ececec;
+    }
+
+    body.dark-mode input[type="file"]::file-selector-button {
+      background: #3a3a3a;
+      color: var(--text);
+    }
+
+    body.dark-mode input[type="file"]::file-selector-button:hover {
+      background: #4a4a4a;
     }
 
     button {
@@ -142,12 +176,15 @@
       border-radius: 8px;
       background: var(--panel);
       overflow: auto;
+      overflow-x: auto;
+      overflow-y: auto;
       white-space: pre;
       line-height: 1.45;
       min-height: 420px;
       width: 100%;
       font: inherit;
       color: inherit;
+      word-wrap: normal;
     }
 
     #display {
@@ -228,6 +265,15 @@
       background: rgba(255, 255, 255, 0.3);
     }
 
+    #exit-preview-btn {
+      background: rgba(220, 53, 69, 0.8);
+      border-color: rgba(220, 53, 69, 0.9);
+    }
+
+    #exit-preview-btn:hover {
+      background: rgba(220, 53, 69, 1);
+    }
+
     .floating-controls .speed-control {
       display: flex;
       align-items: center;
@@ -238,10 +284,17 @@
     .floating-controls .speed-control span {
       color: rgba(255, 255, 255, 0.9);
       font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .floating-controls .speed-control span {
+      min-width: 30px;
+      text-align: right;
     }
 
     .floating-controls input[type="range"] {
       width: 150px;
+      min-width: 100px;
     }
 
     .speed-control {
@@ -253,10 +306,59 @@
     .speed-control label {
       font-size: 13px;
       color: var(--muted);
+      white-space: nowrap;
     }
 
     .speed-control input[type="range"] {
       width: 50vw;
+      cursor: pointer;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-track {
+      background: var(--border);
+      height: 6px;
+      border-radius: 3px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      background: #4a9eff;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      margin-top: -7px;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-track {
+      background: var(--border);
+      height: 6px;
+      border-radius: 3px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      background: #4a9eff;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+    }
+
+    body.dark-mode input[type="range"]::-webkit-slider-thumb {
+      background: #3a7fcf;
+    }
+
+    body.dark-mode input[type="range"]::-moz-range-thumb {
+      background: #3a7fcf;
     }
 
     @media print {
@@ -265,27 +367,172 @@
       #display, #editor { border: none; }
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
+      body {
+        padding: 8px;
+      }
+
+      .wrap {
+        gap: 8px;
+      }
+
       .toolbar {
         gap: 8px;
+        padding: 10px;
+      }
+
+      .btn-group {
+        flex-wrap: wrap;
+        width: 100%;
       }
 
       .btn-group::after {
         display: none;
       }
 
-      .btn-group {
-        flex-wrap: wrap;
+      button {
+        padding: 10px 14px;
+        font-size: 14px;
+        min-height: 44px;
+        flex: 1;
+        min-width: 60px;
+      }
+
+      input[type="file"] {
+        font-size: 14px;
+        min-height: 44px;
+        padding: 8px;
+      }
+
+      #play-btn {
+        width: 100%;
+        order: 10;
+        margin-top: 4px;
       }
 
       .toolbar-info {
         width: 100%;
         margin-left: 0;
         align-items: flex-start;
+        order: 11;
+        margin-top: 8px;
       }
 
-      #play-btn {
+      #display,
+      #editor {
+        font-size: 14px;
+        padding: 12px;
+        min-height: 300px;
+      }
+
+      .floating-controls {
+        padding: 12px 10px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .floating-controls button {
+        padding: 12px 20px;
+        font-size: 14px;
+        min-height: 44px;
+        flex: 1;
+        min-width: 100px;
+      }
+
+      #exit-preview-btn {
+        flex: 0.8;
+        min-width: 80px;
+      }
+
+      .floating-controls .speed-control {
         width: 100%;
+        justify-content: center;
+      }
+
+      .floating-controls input[type="range"] {
+        width: 60%;
+        min-width: 150px;
+      }
+
+      .speed-control input[type="range"] {
+        width: 60vw;
+        min-width: 150px;
+      }
+
+      body.play-mode #display,
+      body.play-mode #editor {
+        padding: 30px 15px 120px 15px;
+        font-size: 16px;
+      }
+
+      .meta,
+      .key-result {
+        font-size: 12px;
+      }
+
+      .chord {
+        padding: 1px 2px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 4px;
+      }
+
+      .toolbar {
+        padding: 8px;
+      }
+
+      button {
+        font-size: 13px;
+        padding: 8px 10px;
+      }
+
+      #display,
+      #editor {
+        font-size: 13px;
+        padding: 10px;
+      }
+
+      body.play-mode #display,
+      body.play-mode #editor {
+        padding: 20px 12px 100px 12px;
+        font-size: 15px;
+      }
+
+      .meta,
+      .key-result {
+        font-size: 11px;
+      }
+
+      .floating-controls input[type="range"] {
+        width: 50%;
+        min-width: 120px;
+      }
+    }
+
+    /* Touch device optimizations */
+    @media (hover: none) and (pointer: coarse) {
+      button {
+        min-height: 48px;
+        padding: 12px 16px;
+      }
+
+      .floating-controls button {
+        min-height: 48px;
+      }
+
+      #exit-preview-btn {
+        min-height: 48px;
+      }
+
+      input[type="file"] {
+        min-height: 48px;
+      }
+
+      #display {
+        cursor: pointer;
       }
     }
   </style>
@@ -340,6 +587,7 @@ A7  D7  Gsus4  G</textarea>
   </div>
 
   <div class="floating-controls">
+    <button id="exit-preview-btn" type="button">✕ Exit</button>
     <button id="start-stop-btn" type="button">▶ Start</button>
     <div class="speed-control">
       <label for="speed-slider">Speed:</label>
@@ -369,6 +617,7 @@ A7  D7  Gsus4  G</textarea>
       const fontIncreaseBtn = document.getElementById("font-increase");
       const darkModeToggle = document.getElementById("dark-mode-toggle");
       const playBtn = document.getElementById("play-btn");
+      const exitPreviewBtn = document.getElementById("exit-preview-btn");
       const startStopBtn = document.getElementById("start-stop-btn");
       const speedSlider = document.getElementById("speed-slider");
       const speedValue = document.getElementById("speed-value");
@@ -849,6 +1098,12 @@ A7  D7  Gsus4  G</textarea>
         event.preventDefault();
         event.stopPropagation();
         enterPreviewMode();
+      });
+
+      exitPreviewBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        exitPreviewMode();
       });
 
       startStopBtn.addEventListener("click", function () {

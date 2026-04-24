@@ -29,7 +29,13 @@
     * { box-sizing: border-box; }
 
     html {
-      scroll-behavior: smooth;
+      scroll-behavior: auto;
+    }
+
+    body.play-mode {
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+      touch-action: none;
     }
 
     body {
@@ -228,6 +234,9 @@
       min-height: 100vh;
       padding: 40px 20px 100px 20px;
       overflow: visible;
+      will-change: scroll-position;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
 
     .floating-controls {
@@ -463,6 +472,9 @@
       body.play-mode #editor {
         padding: 30px 15px 120px 15px;
         font-size: 16px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       }
 
       .meta,
@@ -499,6 +511,9 @@
       body.play-mode #editor {
         padding: 20px 12px 100px 12px;
         font-size: 15px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       }
 
       .meta,
@@ -622,15 +637,27 @@ A7  D7  Gsus4  G</textarea>
       const speedSlider = document.getElementById("speed-slider");
       const speedValue = document.getElementById("speed-value");
 
+      // Detect iOS devices
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      // Adjust speed slider range for iOS
+      if (isIOS) {
+        speedSlider.max = "10";
+        speedSlider.value = "5";
+        speedValue.textContent = "5";
+      }
+
       let fileName = "chords_transposed.txt";
       let originalText = editor.value;
       let offset = 0;
       let fontSize = 16;
       let isInPreviewMode = false;
       let isScrolling = false;
-      let scrollSpeed = 30;
+      let scrollSpeed = isIOS ? 5 : 30;
       let animationId = null;
       let scrollAccumulator = 0;
+      let lastFrameTime = 0;
 
       if (typeof pdfjsLib !== 'undefined') {
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -1006,45 +1033,79 @@ A7  D7  Gsus4  G</textarea>
 
       speedSlider.addEventListener("input", function () {
         scrollSpeed = parseInt(speedSlider.value);
-        speedValue.textContent = scrollSpeed * 2;
+        speedValue.textContent = scrollSpeed;
       });
 
-      function autoScroll() {
+      function autoScroll(timestamp) {
         if (!isScrolling) return;
 
-        let maxScroll, currentScroll;
-        const pixelsPerFrame = (scrollSpeed / 20);
-        scrollAccumulator += pixelsPerFrame;
-        const scrollAmount = Math.floor(scrollAccumulator);
+        // Initialize lastFrameTime on first frame
+        if (!lastFrameTime) {
+          lastFrameTime = timestamp;
+          animationId = requestAnimationFrame(autoScroll);
+          return;
+        }
+
+        // Calculate elapsed time since last frame (cap at 100ms to prevent jumps after tab switches)
+        const deltaTime = Math.min(timestamp - lastFrameTime, 100);
+        lastFrameTime = timestamp;
+
+        // Calculate pixels to scroll based on time elapsed (not frames)
+        // iOS: scrollSpeed ranges from 1-10, map to 10-100 px/s for smooth scrolling
+        // Desktop: scrollSpeed ranges from 1-50, use exponential curve for better control
+        let pixelsPerSecond;
+        if (isIOS) {
+          pixelsPerSecond = scrollSpeed * 10; // 10-100 pixels per second
+        } else {
+          pixelsPerSecond = scrollSpeed < 15 
+            ? scrollSpeed * 5 
+            : scrollSpeed < 35 
+              ? 75 + (scrollSpeed - 15) * 5 
+              : 175 + (scrollSpeed - 35) * 8;
+        }
         
+        const pixelsThisFrame = (pixelsPerSecond * deltaTime) / 1000;
+        scrollAccumulator += pixelsThisFrame;
+        
+        // Only scroll when we have at least 1 pixel (prevents iOS stuttering)
+        const scrollAmount = Math.floor(scrollAccumulator);
         if (scrollAmount >= 1) {
           scrollAccumulator -= scrollAmount;
           
           if (isInPreviewMode) {
-            maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-            currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
             
-            if (maxScroll > 0 && currentScroll >= maxScroll - 5) {
+            if (maxScroll <= 0) {
               stopScrolling();
               return;
             }
             
-            if (maxScroll > 0) {
-              window.scrollBy(0, scrollAmount);
+            if (currentScroll >= maxScroll - 5) {
+              stopScrolling();
+              return;
             }
+            
+            // Use direct property assignment for better iOS performance
+            const newPosition = Math.min(currentScroll + scrollAmount, maxScroll);
+            document.documentElement.scrollTop = newPosition;
+            document.body.scrollTop = newPosition; // Fallback for older browsers
           } else {
             const container = display.classList.contains("editing") ? editor : display;
-            maxScroll = container.scrollHeight - container.clientHeight;
-            currentScroll = container.scrollTop;
+            const maxScroll = container.scrollHeight - container.clientHeight;
+            const currentScroll = container.scrollTop;
             
-            if (maxScroll > 0 && currentScroll >= maxScroll - 5) {
+            if (maxScroll <= 0) {
               stopScrolling();
               return;
             }
             
-            if (maxScroll > 0) {
-              container.scrollTop += scrollAmount;
+            if (currentScroll >= maxScroll - 5) {
+              stopScrolling();
+              return;
             }
+            
+            container.scrollTop = Math.min(currentScroll + scrollAmount, maxScroll);
           }
         }
         
@@ -1060,7 +1121,10 @@ A7  D7  Gsus4  G</textarea>
           isInPreviewMode = true;
           document.body.classList.add("play-mode");
           window.scrollTo(0, 0);
-        }, 0);
+          
+          // Force layout recalculation after text wrapping on mobile
+          document.body.offsetHeight;
+        }, 100);
       }
 
       function exitPreviewMode() {
@@ -1072,13 +1136,15 @@ A7  D7  Gsus4  G</textarea>
       function startScrolling() {
         isScrolling = true;
         scrollAccumulator = 0;
+        lastFrameTime = 0;
         startStopBtn.textContent = "⏸ Pause";
-        autoScroll();
+        animationId = requestAnimationFrame(autoScroll);
       }
 
       function stopScrolling() {
         isScrolling = false;
         scrollAccumulator = 0;
+        lastFrameTime = 0;
         startStopBtn.textContent = "▶ Start";
         if (animationId) {
           cancelAnimationFrame(animationId);

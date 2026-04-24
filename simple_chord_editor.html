@@ -1,0 +1,880 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Barebone Chord Viewer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --panel: #ffffff;
+      --text: #1e1e1e;
+      --muted: #666;
+      --border: #d5d5d5;
+      --chord-bg: #e8f2fb;
+      --chord-text: #0f4c81;
+    }
+
+    body.dark-mode {
+      --bg: #1e1e1e;
+      --panel: #2d2d2d;
+      --text: #e0e0e0;
+      --muted: #aaa;
+      --border: #444;
+      --chord-bg: #2a4a5e;
+      --chord-text: #6db3f2;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .btn-group::after {
+      content: '';
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      margin-left: 6px;
+    }
+
+    .btn-group:last-of-type::after {
+      display: none;
+    }
+
+    button, input[type="file"] {
+      font: inherit;
+    }
+
+    button {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      background: #f3f3f3;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    button:hover { background: #ececec; }
+
+    #play-btn {
+      background: #4a9eff;
+      color: white;
+      border-color: #3a8eef;
+      font-weight: 500;
+    }
+
+    #play-btn:hover {
+      background: #3a8eef;
+    }
+
+    body.dark-mode button {
+      background: #3a3a3a;
+    }
+
+    body.dark-mode button:hover {
+      background: #4a4a4a;
+    }
+
+    body.dark-mode #play-btn {
+      background: #3a7fcf;
+      border-color: #2a6fbf;
+    }
+
+    body.dark-mode #play-btn:hover {
+      background: #4a8fdf;
+    }
+
+    .toolbar-info {
+      margin-left: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .key-result {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    #display,
+    #editor {
+      margin: 0;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow: auto;
+      white-space: pre;
+      line-height: 1.45;
+      min-height: 420px;
+      width: 100%;
+      font: inherit;
+      color: inherit;
+    }
+
+    #display {
+      cursor: text;
+    }
+
+    #editor {
+      resize: vertical;
+      display: none;
+    }
+
+    #editor.editing {
+      display: block;
+    }
+
+    #display.editing {
+      display: none;
+    }
+
+    .chord {
+      color: var(--chord-text);
+      background: var(--chord-bg);
+      border-radius: 3px;
+      font-weight: 700;
+      padding: 0 1px;
+    }
+
+    body.play-mode .wrap {
+      max-width: 100%;
+      gap: 0;
+    }
+
+    body.play-mode .toolbar {
+      display: none;
+    }
+
+    body.play-mode #display,
+    body.play-mode #editor {
+      border: none;
+      border-radius: 0;
+      min-height: 100vh;
+      padding: 40px 20px 100px 20px;
+      overflow: visible;
+    }
+
+    .floating-controls {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 16px 20px;
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+
+    body.dark-mode .floating-controls {
+      background: rgba(30, 30, 30, 0.9);
+    }
+
+    body.play-mode .floating-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .floating-controls button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 8px 16px;
+    }
+
+    .floating-controls button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .floating-controls .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .floating-controls .speed-control label,
+    .floating-controls .speed-control span {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+    }
+
+    .floating-controls input[type="range"] {
+      width: 150px;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .speed-control label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .speed-control input[type="range"] {
+      width: 50vw;
+    }
+
+    @media print {
+      .toolbar { display: none; }
+      body { background: white; color: black; }
+      #display, #editor { border: none; }
+    }
+
+    @media (max-width: 640px) {
+      .toolbar {
+        gap: 8px;
+      }
+
+      .btn-group::after {
+        display: none;
+      }
+
+      .btn-group {
+        flex-wrap: wrap;
+      }
+
+      .toolbar-info {
+        width: 100%;
+        margin-left: 0;
+        align-items: flex-start;
+      }
+
+      #play-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <!-- File Operations -->
+      <div class="btn-group">
+        <input id="file-picker" type="file" accept=".txt,.md,.chord,.pro,.html,.htm,.pdf">
+        <button id="save" type="button">Save</button>
+        <button id="print-pdf" type="button">Print</button>
+      </div>
+
+      <!-- Transpose Controls -->
+      <div class="btn-group">
+        <button id="transpose-down" type="button">-1</button>
+        <button id="transpose-up" type="button">+1</button>
+        <button id="reset" type="button">Reset</button>
+        <button id="detect-key" type="button">Detect Key</button>
+      </div>
+
+      <!-- Display Controls -->
+      <div class="btn-group">
+        <button id="font-decrease" type="button">A-</button>
+        <button id="font-increase" type="button">A+</button>
+        <button id="dark-mode-toggle" type="button">🌙</button>
+      </div>
+
+      <!-- Preview Mode -->
+      <button id="play-btn" type="button">▶ Preview</button>
+
+      <!-- Info Display -->
+      <div class="toolbar-info">
+        <span id="meta" class="meta">No file loaded | Transpose: +0</span>
+        <span id="key-result" class="key-result">Key: not analyzed</span>
+      </div>
+    </div>
+
+    <pre id="display">Load a chord text file with the file picker.
+
+Example:
+G   D   Em   C
+lyrics line here
+A7  D7  Gsus4  G</pre>
+    <textarea id="editor" spellcheck="false">Load a chord text file with the file picker.
+
+Example:
+G   D   Em   C
+lyrics line here
+A7  D7  Gsus4  G</textarea>
+  </div>
+
+  <div class="floating-controls">
+    <button id="start-stop-btn" type="button">▶ Start</button>
+    <div class="speed-control">
+      <label for="speed-slider">Speed:</label>
+      <input id="speed-slider" type="range" min="1" max="50" value="30" >
+      <span id="speed-value">30</span>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sharpScale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+      const flatToSharp = { Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#" };
+      const chordRegex = /^([A-G](?:#|b)?)([^/\s]*)(?:\/([A-G](?:#|b)?)([^/\s]*))?$/;
+
+      const picker = document.getElementById("file-picker");
+      const upBtn = document.getElementById("transpose-up");
+      const downBtn = document.getElementById("transpose-down");
+      const resetBtn = document.getElementById("reset");
+      const detectBtn = document.getElementById("detect-key");
+      const saveBtn = document.getElementById("save");
+      const meta = document.getElementById("meta");
+      const keyResult = document.getElementById("key-result");
+      const display = document.getElementById("display");
+      const editor = document.getElementById("editor");
+      const printBtn = document.getElementById("print-pdf");
+      const fontDecreaseBtn = document.getElementById("font-decrease");
+      const fontIncreaseBtn = document.getElementById("font-increase");
+      const darkModeToggle = document.getElementById("dark-mode-toggle");
+      const playBtn = document.getElementById("play-btn");
+      const startStopBtn = document.getElementById("start-stop-btn");
+      const speedSlider = document.getElementById("speed-slider");
+      const speedValue = document.getElementById("speed-value");
+
+      let fileName = "chords_transposed.txt";
+      let originalText = editor.value;
+      let offset = 0;
+      let fontSize = 16;
+      let isInPreviewMode = false;
+      let isScrolling = false;
+      let scrollSpeed = 30;
+      let animationId = null;
+      let scrollAccumulator = 0;
+
+      if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+
+      function normalizeNote(note) {
+        return flatToSharp[note] || note;
+      }
+
+      function transposeNote(note, semitones) {
+        const normalized = normalizeNote(note);
+        const index = sharpScale.indexOf(normalized);
+        if (index < 0) return note;
+        return sharpScale[(index + semitones + 1200) % 12];
+      }
+
+      function isChordToken(token) {
+        return chordRegex.test(token);
+      }
+
+      function isChordLine(line) {
+        const trimmed = line.trim();
+        if (!trimmed) return false;
+        
+        // Skip section markers like [Chorus], [Verse], [Instrumental]
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) return false;
+        
+        // Remove bar lines, brackets, and parentheses, then split into tokens
+        const cleanedLine = trimmed.replace(/[\|\[\]\(\)]/g, ' ');
+        const tokens = cleanedLine.split(/\s+/).filter(t => t.length > 0);
+        
+        if (tokens.length === 0) return false;
+        
+        const chordCount = tokens.filter(isChordToken).length;
+        // Consider it a chord line if at least 50% of tokens are chords
+        return chordCount > 0 && chordCount >= tokens.length * 0.5;
+      }
+
+      function transposeChordToken(token, semitones) {
+        const match = token.match(chordRegex);
+        if (!match) return token;
+
+        const root = match[1];
+        const extension = match[2] || "";
+        const bassRoot = match[3];
+        const bassExtension = match[4] || "";
+
+        const transposedRoot = transposeNote(root, semitones);
+        if (!bassRoot) return transposedRoot + extension;
+
+        const transposedBass = transposeNote(bassRoot, semitones);
+        return transposedRoot + extension + "/" + transposedBass + bassExtension;
+      }
+
+      function transposeText(text, semitones) {
+        return text
+          .split("\n")
+          .map((line) => {
+            if (!isChordLine(line)) return line;
+            
+            // Match chord patterns similar to chordRegex but without anchors
+            // This allows matching chords within larger strings while preserving special chars
+            return line.replace(/[A-G](?:#|b)?[^\s\/|\[\]\(\)]*(?:\/[A-G](?:#|b)?[^\s\/|\[\]\(\)]*)*/g, 
+              function(match) {
+                // Only transpose if it's a valid chord token
+                if (isChordToken(match)) {
+                  return transposeChordToken(match, semitones);
+                }
+                return match;
+              }
+            );
+          })
+          .join("\n");
+      }
+
+      function getChordQuality(extension) {
+        const ext = (extension || "").toLowerCase();
+        if (ext.includes("dim") || ext.includes("b5")) return "dim";
+        if ((ext.startsWith("m") || ext.startsWith("min")) && !ext.startsWith("maj")) return "min";
+        return "maj";
+      }
+
+      function extractChords(text) {
+        const lines = text.split("\n");
+        const chords = [];
+        const rootsInOrder = [];
+        const rootCounts = new Map();
+
+        lines.forEach((line) => {
+          if (!isChordLine(line)) return;
+          line.trim().split(/\s+/).forEach((token) => {
+            const match = token.match(chordRegex);
+            if (!match) return;
+            const root = normalizeNote(match[1]);
+            const quality = getChordQuality(match[2] || "");
+            chords.push({ root: root, quality: quality });
+            rootsInOrder.push(root);
+            rootCounts.set(root, (rootCounts.get(root) || 0) + 1);
+          });
+        });
+
+        return { chords: chords, rootsInOrder: rootsInOrder, rootCounts: rootCounts };
+      }
+
+      function scoreCandidate(keyRoot, mode, chordData) {
+        const majorExpected = { 0: "maj", 2: "min", 4: "min", 5: "maj", 7: "maj", 9: "min", 11: "dim" };
+        const minorExpected = { 0: "min", 2: "dim", 3: "maj", 5: "min", 7: "min", 8: "maj", 10: "maj" };
+        const expected = mode === "major" ? majorExpected : minorExpected;
+
+        const keyIndex = sharpScale.indexOf(keyRoot);
+        if (keyIndex < 0) return -Infinity;
+
+        let score = 0;
+        chordData.chords.forEach((chord) => {
+          const chordIndex = sharpScale.indexOf(chord.root);
+          if (chordIndex < 0) return;
+          const interval = (chordIndex - keyIndex + 12) % 12;
+          const expectedQuality = expected[interval];
+
+          if (!expectedQuality) {
+            score -= 1.25;
+            return;
+          }
+
+          score += 2;
+          if (chord.quality === expectedQuality) {
+            score += 2;
+            return;
+          }
+
+          // In minor keys, allow a raised dominant major chord from harmonic minor usage.
+          if (mode === "minor" && interval === 7 && chord.quality === "maj") {
+            score += 1.5;
+            return;
+          }
+
+          score -= 0.75;
+        });
+
+        const firstRoot = chordData.rootsInOrder[0];
+        const lastRoot = chordData.rootsInOrder[chordData.rootsInOrder.length - 1];
+        if (firstRoot === keyRoot) score += 1.5;
+        if (lastRoot === keyRoot) score += 2;
+
+        const dominant = sharpScale[(keyIndex + 7) % 12];
+        for (let i = 0; i < chordData.rootsInOrder.length - 1; i += 1) {
+          if (chordData.rootsInOrder[i] === dominant && chordData.rootsInOrder[i + 1] === keyRoot) {
+            score += 1;
+          }
+        }
+
+        return score;
+      }
+
+      function detectKeyFromText(text) {
+        const chordData = extractChords(text);
+        if (!chordData.chords.length) {
+          return null;
+        }
+
+        const candidates = [];
+        sharpScale.forEach((root) => {
+          candidates.push({ key: root + " major", score: scoreCandidate(root, "major", chordData) });
+          candidates.push({ key: root + " minor", score: scoreCandidate(root, "minor", chordData) });
+        });
+
+        candidates.sort((a, b) => b.score - a.score);
+        const top = candidates.slice(0, 3);
+        const positiveTotal = top.reduce((sum, item) => sum + Math.max(item.score, 0), 0);
+
+        return top.map((item, index) => {
+          const confidence = positiveTotal > 0 ? Math.round((Math.max(item.score, 0) / positiveTotal) * 100) : 0;
+          const label = (index + 1) + ". " + item.key + " (" + confidence + "%)";
+          return label;
+        });
+      }
+
+      function currentText() {
+        return transposeText(originalText, offset);
+      }
+
+      function escapeHtml(text) {
+        return text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function renderHighlightedText(text) {
+        return text
+          .split("\n")
+          .map((line) => {
+            if (!isChordLine(line)) {
+              return escapeHtml(line);
+            }
+            // Match chords while preserving special characters
+            return line.replace(/([|\[\]\(\)\s]+)|([A-G](?:#|b)?[^\s\/|\[\]\(\)]*(?:\/[A-G](?:#|b)?[^\s\/|\[\]\(\)]*)*)/g, 
+              function(match, specialChars, chordPart) {
+                if (specialChars) {
+                  // Preserve and escape special characters and whitespace
+                  return escapeHtml(specialChars);
+                }
+                // Test if it's a valid chord
+                if (isChordToken(chordPart)) {
+                  return '<span class="chord">' + escapeHtml(chordPart) + "</span>";
+                }
+                return escapeHtml(chordPart);
+              }
+            );
+          })
+          .join("\n");
+      }
+
+      function refresh() {
+        const text = currentText();
+        editor.value = text;
+        display.innerHTML = renderHighlightedText(text);
+        meta.textContent = fileName + " | Transpose: " + (offset >= 0 ? "+" : "") + offset;
+        keyResult.textContent = "Key: not analyzed";
+      }
+
+      function enterEditMode() {
+        display.classList.add("editing");
+        editor.classList.add("editing");
+        editor.focus();
+      }
+
+      function exitEditMode() {
+        originalText = transposeText(editor.value, -offset);
+        display.classList.remove("editing");
+        editor.classList.remove("editing");
+        refresh();
+      }
+
+      editor.addEventListener("blur", function () {
+        exitEditMode();
+      });
+
+      editor.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          editor.blur();
+        }
+      });
+
+      async function extractTextFromPDF(file) {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = "";
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items.map(item => item.str).join(" ");
+          fullText += pageText + "\n";
+        }
+
+        return fullText;
+      }
+
+      picker.addEventListener("change", async function (event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        fileName = file.name;
+
+        if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+          if (typeof pdfjsLib === 'undefined') {
+            alert("PDF.js library failed to load. Please refresh the page.");
+            return;
+          }
+          try {
+            originalText = await extractTextFromPDF(file);
+          } catch (error) {
+            alert("Failed to extract text from PDF: " + error.message);
+            return;
+          }
+        } else {
+          originalText = await file.text();
+        }
+
+        offset = 0;
+        refresh();
+      });
+
+      upBtn.addEventListener("click", function () {
+        offset += 1;
+        refresh();
+      });
+
+      downBtn.addEventListener("click", function () {
+        offset -= 1;
+        refresh();
+      });
+
+      resetBtn.addEventListener("click", function () {
+        offset = 0;
+        refresh();
+      });
+
+      detectBtn.addEventListener("click", function () {
+        const detected = detectKeyFromText(currentText());
+        if (!detected) {
+          keyResult.textContent = "Key: no chord data found";
+          return;
+        }
+        keyResult.textContent = "Key candidates: " + detected.join(" | ");
+      });
+
+      async function saveCurrentText() {
+        const textToSave = currentText();
+        const defaultName = fileName.replace(/\.[^.]+$/, "") + "_transpose" + (offset >= 0 ? "+" : "") + offset + ".txt";
+
+        if (window.showSaveFilePicker) {
+          try {
+            const handle = await window.showSaveFilePicker({
+              suggestedName: defaultName,
+              types: [{
+                description: "Text Files",
+                accept: { "text/plain": [".txt", ".md"] }
+              }]
+            });
+            const writable = await handle.createWritable();
+            await writable.write(textToSave);
+            await writable.close();
+            return;
+          } catch (error) {
+            if (error && error.name === "AbortError") return;
+          }
+        }
+
+        const blob = new Blob([textToSave], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = defaultName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      saveBtn.addEventListener("click", async function () {
+        await saveCurrentText();
+      });
+
+      document.addEventListener("keydown", async function (event) {
+        const isSaveShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s";
+        if (!isSaveShortcut) return;
+        event.preventDefault();
+        await saveCurrentText();
+      });
+
+      printBtn.addEventListener("click", function () {
+        window.print();
+      });
+
+      fontDecreaseBtn.addEventListener("click", function () {
+        fontSize = Math.max(10, fontSize - 2);
+        display.style.fontSize = fontSize + "px";
+        editor.style.fontSize = fontSize + "px";
+      });
+
+      fontIncreaseBtn.addEventListener("click", function () {
+        fontSize = Math.min(32, fontSize + 2);
+        display.style.fontSize = fontSize + "px";
+        editor.style.fontSize = fontSize + "px";
+      });
+
+      darkModeToggle.addEventListener("click", function () {
+        document.body.classList.toggle("dark-mode");
+        darkModeToggle.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
+      });
+
+      speedSlider.addEventListener("input", function () {
+        scrollSpeed = parseInt(speedSlider.value);
+        speedValue.textContent = scrollSpeed * 2;
+      });
+
+      function autoScroll() {
+        if (!isScrolling) return;
+
+        let maxScroll, currentScroll;
+        const pixelsPerFrame = (scrollSpeed / 20);
+        scrollAccumulator += pixelsPerFrame;
+        const scrollAmount = Math.floor(scrollAccumulator);
+        
+        if (scrollAmount >= 1) {
+          scrollAccumulator -= scrollAmount;
+          
+          if (isInPreviewMode) {
+            maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (maxScroll > 0 && currentScroll >= maxScroll - 5) {
+              stopScrolling();
+              return;
+            }
+            
+            if (maxScroll > 0) {
+              window.scrollBy(0, scrollAmount);
+            }
+          } else {
+            const container = display.classList.contains("editing") ? editor : display;
+            maxScroll = container.scrollHeight - container.clientHeight;
+            currentScroll = container.scrollTop;
+            
+            if (maxScroll > 0 && currentScroll >= maxScroll - 5) {
+              stopScrolling();
+              return;
+            }
+            
+            if (maxScroll > 0) {
+              container.scrollTop += scrollAmount;
+            }
+          }
+        }
+        
+        animationId = requestAnimationFrame(autoScroll);
+      }
+
+      function enterPreviewMode() {
+        if (display.classList.contains("editing")) {
+          exitEditMode();
+        }
+        
+        setTimeout(function() {
+          isInPreviewMode = true;
+          document.body.classList.add("play-mode");
+          window.scrollTo(0, 0);
+        }, 0);
+      }
+
+      function exitPreviewMode() {
+        stopScrolling();
+        isInPreviewMode = false;
+        document.body.classList.remove("play-mode");
+      }
+
+      function startScrolling() {
+        isScrolling = true;
+        scrollAccumulator = 0;
+        startStopBtn.textContent = "⏸ Pause";
+        autoScroll();
+      }
+
+      function stopScrolling() {
+        isScrolling = false;
+        scrollAccumulator = 0;
+        startStopBtn.textContent = "▶ Start";
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+      }
+
+      function toggleScrolling() {
+        if (isScrolling) {
+          stopScrolling();
+        } else {
+          startScrolling();
+        }
+      }
+
+      playBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        enterPreviewMode();
+      });
+
+      startStopBtn.addEventListener("click", function () {
+        toggleScrolling();
+      });
+
+      display.addEventListener("click", function () {
+        if (isInPreviewMode) {
+          return;
+        }
+        enterEditMode();
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && isInPreviewMode) {
+          event.preventDefault();
+          exitPreviewMode();
+        }
+        if (event.key === " " && isInPreviewMode) {
+          event.preventDefault();
+          toggleScrolling();
+        }
+      });
+
+      refresh();
+    })();
+  </script>
+</body>
+</html>

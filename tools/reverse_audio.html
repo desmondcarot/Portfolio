@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Recorder - Reverse Playback</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .game-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-record {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-record:hover:not(:disabled) {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-record.recording {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .btn-play {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-play:hover:not(:disabled) {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+        }
+
+        .status-message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .instructions {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        .audio-visualizer {
+            height: 60px;
+            background: #e9ecef;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visualizer-bar {
+            width: 4px;
+            background: #667eea;
+            margin: 0 2px;
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- Step 1: First Recording -->
+        <div class="game-section">
+            <div class="section-title">First Recording</div>
+            <div class="button-group">
+                <button id="recordOriginal" class="btn-record">🎤 Record</button>
+                <button id="playOriginal" class="btn-play" disabled>▶️ Play Normal</button>
+                <button id="playOriginalReversed" class="btn-secondary" disabled>🔄 Play Reversed</button>
+            </div>
+            <div id="originalStatus" class="status-message status-info" style="display: none;"></div>
+            <div class="audio-visualizer" id="visualizer1"></div>
+        </div>
+
+        <!-- Step 2: Second Recording -->
+        <div class="game-section">
+            <div class="section-title">Second Recording</div>
+            <div class="button-group">
+                <button id="recordAttempt" class="btn-record">🎤 Record</button>
+                <button id="playAttempt" class="btn-play" disabled>▶️ Play Normal</button>
+                <button id="playAttemptReversed" class="btn-secondary" disabled>🔄 Play Reversed</button>
+            </div>
+            <div id="attemptStatus" class="status-message status-info" style="display: none;"></div>
+            <div class="audio-visualizer" id="visualizer2"></div>
+        </div>
+    </div>
+
+    <script>
+        class ReverseAudioGame {
+            constructor() {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                this.originalAudioBuffer = null;
+                this.attemptAudioBuffer = null;
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.isRecording = false;
+                this.currentAudioSource = null;
+
+                this.initializeButtons();
+            }
+
+            initializeButtons() {
+                // Original recording buttons
+                document.getElementById('recordOriginal').addEventListener('click', () => this.startRecording('original'));
+                document.getElementById('playOriginal').addEventListener('click', () => this.playAudio(this.originalAudioBuffer, false));
+                document.getElementById('playOriginalReversed').addEventListener('click', () => this.playAudio(this.originalAudioBuffer, true));
+
+                // Attempt recording buttons
+                document.getElementById('recordAttempt').addEventListener('click', () => this.startRecording('attempt'));
+                document.getElementById('playAttempt').addEventListener('click', () => this.playAudio(this.attemptAudioBuffer, false));
+                document.getElementById('playAttemptReversed').addEventListener('click', () => this.playAudio(this.attemptAudioBuffer, true));
+            }
+
+            async startRecording(type) {
+                if (this.isRecording) {
+                    this.stopRecording(type);
+                    return;
+                }
+
+                try {
+                    // Resume audio context if suspended
+                    if (this.audioContext.state === 'suspended') {
+                        await this.audioContext.resume();
+                    }
+
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    const options = { mimeType: 'audio/webm' };
+                    this.mediaRecorder = new MediaRecorder(stream, options);
+                    this.audioChunks = [];
+
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            this.audioChunks.push(event.data);
+                        }
+                    };
+
+                    this.mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                        const arrayBuffer = await audioBlob.arrayBuffer();
+                        
+                        try {
+                            const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+                            
+                            if (type === 'original') {
+                                this.originalAudioBuffer = audioBuffer;
+                                this.showStatus('originalStatus', 'Recording saved!', 'success');
+                                document.getElementById('playOriginal').disabled = false;
+                                document.getElementById('playOriginalReversed').disabled = false;
+                            } else {
+                                this.attemptAudioBuffer = audioBuffer;
+                                this.showStatus('attemptStatus', 'Recording saved!', 'success');
+                                document.getElementById('playAttempt').disabled = false;
+                                document.getElementById('playAttemptReversed').disabled = false;
+                            }
+                        } catch (decodeError) {
+                            this.showStatus(
+                                type === 'original' ? 'originalStatus' : 'attemptStatus',
+                                'Error processing audio. Please try again.',
+                                'warning'
+                            );
+                        }
+
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    this.mediaRecorder.start(100);
+                    this.isRecording = true;
+
+                    const button = document.getElementById(type === 'original' ? 'recordOriginal' : 'recordAttempt');
+                    button.textContent = '⏹️ Stop Recording';
+                    button.classList.add('recording');
+
+                    this.showStatus(
+                        type === 'original' ? 'originalStatus' : 'attemptStatus',
+                        'Recording... Click stop when done',
+                        'warning'
+                    );
+
+                } catch (error) {
+                    alert('Error accessing microphone. Please allow microphone access.');
+                }
+            }
+
+            stopRecording(type) {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.isRecording = false;
+
+                    const button = document.getElementById(type === 'original' ? 'recordOriginal' : 'recordAttempt');
+                    button.textContent = '🎤 Record';
+                    button.classList.remove('recording');
+                }
+            }
+
+            reverseAudioBuffer(audioBuffer) {
+                const reversedBuffer = this.audioContext.createBuffer(
+                    audioBuffer.numberOfChannels,
+                    audioBuffer.length,
+                    audioBuffer.sampleRate
+                );
+
+                for (let channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
+                    const originalData = audioBuffer.getChannelData(channel);
+                    const reversedData = reversedBuffer.getChannelData(channel);
+                    
+                    for (let i = 0; i < originalData.length; i++) {
+                        reversedData[i] = originalData[originalData.length - 1 - i];
+                    }
+                }
+
+                return reversedBuffer;
+            }
+
+            async playAudio(audioBuffer, reverse = false) {
+                try {
+                    if (!audioBuffer) {
+                        return;
+                    }
+
+                    if (this.audioContext.state === 'suspended') {
+                        await this.audioContext.resume();
+                    }
+
+                    if (this.currentAudioSource) {
+                        try {
+                            this.currentAudioSource.stop();
+                        } catch (e) {}
+                    }
+
+                    const bufferToPlay = reverse ? this.reverseAudioBuffer(audioBuffer) : audioBuffer;
+                    const gainNode = this.audioContext.createGain();
+                    gainNode.gain.value = 1.0;
+                    
+                    this.currentAudioSource = this.audioContext.createBufferSource();
+                    this.currentAudioSource.buffer = bufferToPlay;
+                    this.currentAudioSource.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    this.currentAudioSource.start(0);
+                    
+                    const statusId = audioBuffer === this.originalAudioBuffer ? 'originalStatus' : 'attemptStatus';
+                    this.showStatus(statusId, `🔊 Playing ${reverse ? 'reversed' : 'normal'} audio...`, 'info');
+
+                    this.currentAudioSource.onended = () => {
+                        this.currentAudioSource = null;
+                        this.showStatus(statusId, 'Playback complete!', 'success');
+                    };
+                } catch (error) {
+                    alert('Error playing audio.');
+                }
+            }
+
+            showStatus(elementId, message, type) {
+                const statusElement = document.getElementById(elementId);
+                statusElement.textContent = message;
+                statusElement.className = `status-message status-${type}`;
+                statusElement.style.display = 'block';
+            }
+        }
+
+        // Initialize the game when the page loads
+        let game;
+        window.addEventListener('DOMContentLoaded', () => {
+            game = new ReverseAudioGame();
+        });
+    </script>
+</body>
+</html>

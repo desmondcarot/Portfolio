@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="zh-MY">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双亲节欢乐翻牌对对碰 Parents' Day Flip Card Game</title>
+    <!-- Tailwind CSS for modern adaptive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for premium Chinese & English typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        body {
+            font-family: 'Noto Sans SC', 'Inter', sans-serif;
+            background: radial-gradient(circle at top, #fff5f5 0%, #fed7d7 50%, #fecaca 100%);
+        }
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        /* Sparkle animation for matched pairs */
+        @keyframes pulse-gold {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0px rgba(250, 204, 21, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(250, 204, 21, 0.4); }
+        }
+        .matched-glow {
+            animation: pulse-gold 1.5s ease-in-out infinite;
+        }
+        @keyframes countdown-pop {
+            0%   { opacity: 0; transform: scale(2.2); }
+            25%  { opacity: 1; transform: scale(1); }
+            70%  { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.6); }
+        }
+        .countdown-pop {
+            animation: countdown-pop 0.85s ease forwards;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col text-gray-800">
+
+    <!-- ── Top Bar ── -->
+    <header class="shrink-0 bg-white/95 backdrop-blur border-b border-rose-100 shadow-sm px-3 py-2 flex items-center gap-3 z-10">
+        <!-- Sidebar toggle -->
+        <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-rose-50 text-rose-500 shrink-0" title="控制面板">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+
+        <!-- Live ping + group name -->
+        <div class="flex items-center gap-2 shrink-0">
+            <div class="w-3 h-3 rounded-full bg-rose-500 animate-ping" id="livePing"></div>
+            <div>
+                <p class="text-[10px] text-gray-400 font-semibold leading-none">当前队伍</p>
+                <h3 class="text-base font-black text-rose-600 leading-tight" id="activeGroupDisplay">请选择队伍开始</h3>
+            </div>
+        </div>
+
+        <div class="w-px h-8 bg-rose-100 shrink-0"></div>
+
+        <!-- Timer -->
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="text-lg">⏱️</span>
+            <span class="text-2xl font-black font-mono tracking-wider text-rose-600" id="timerDisplay">00:00</span>
+        </div>
+
+        <div class="w-px h-8 bg-rose-100 shrink-0"></div>
+
+        <!-- Progress -->
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+            <span class="text-xs font-bold text-gray-500 shrink-0">进度:</span>
+            <div class="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                <div id="matchProgressBar" class="bg-gradient-to-r from-emerald-400 to-green-500 h-full w-0 transition-all duration-300"></div>
+            </div>
+            <span class="text-sm font-black text-emerald-600 shrink-0" id="progressText">0 / 8 对</span>
+        </div>
+
+        <!-- Audio toggle -->
+        <button onclick="toggleAudio()" class="shrink-0 text-xs flex items-center gap-1 text-gray-500 hover:text-rose-600 font-bold px-2 py-1 rounded-lg hover:bg-rose-50">
+            <span id="audioIcon">🔊</span>
+            <span id="audioText" class="hidden sm:inline">音效</span>
+        </button>
+    </header>
+
+    <!-- ── Body ── -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- Sidebar Modal -->
+        <div id="sidebar" class="fixed inset-0 z-40 flex items-stretch justify-start">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleSidebar()"></div>
+            <aside class="relative w-96 bg-white border-r border-rose-100 overflow-y-auto flex flex-col shadow-2xl z-10">
+            <button onclick="toggleSidebar()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl leading-none font-bold" title="关闭">&#x2715;</button>
+            <div class="p-4 space-y-5">
+
+                <!-- Title -->
+                <div class="text-center pt-2">
+                    <span class="inline-block bg-pink-100 text-pink-600 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider shadow-sm">
+                        💝 双亲节翻牌对对碰 2026
+                    </span>
+                    <h1 class="text-base font-black text-rose-600 mt-1">Parents' Day Flip Card Game</h1>
+                </div>
+
+                <!-- Difficulty Selector -->
+                <div class="bg-white rounded-2xl border border-rose-100 p-4 shadow-sm">
+                    <h2 class="text-base font-bold text-gray-900 mb-3 border-b pb-2 border-gray-100">🎮 难度 Difficulty</h2>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btnNormal" onclick="setDifficulty('normal')"
+                                class="py-2.5 rounded-xl font-bold text-sm border-2 border-rose-400 bg-rose-500 text-white shadow transition-all">
+                            🟢 普通 Normal<br><span class="text-xs font-normal opacity-90" id="labelNormal"></span>
+                        </button>
+                        <button id="btnHard" onclick="setDifficulty('hard')"
+                                class="py-2.5 rounded-xl font-bold text-sm border-2 border-gray-200 bg-gray-50 text-gray-600 transition-all hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700">
+                            🔴 困难 Hard<br><span class="text-xs font-normal opacity-80" id="labelHard"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Group Status Panel -->
+                <div class="bg-white rounded-2xl border border-rose-100 p-4 shadow-sm">
+                    <h2 class="text-base font-bold text-gray-900 mb-3 flex items-center justify-between border-b pb-2 border-gray-100">
+                        <span>👥 小组选择 & 控制</span>
+                        <span class="text-xs text-rose-500 px-2 py-0.5 bg-rose-50 rounded-full font-semibold" id="groupCountBadge">轮流</span>
+                    </h2>
+                    <div class="space-y-2 mb-3" id="groupsContainer"></div>
+
+                    <button onclick="addGroup()"
+                            class="w-full flex items-center justify-center gap-1 text-xs text-rose-500 hover:text-white border border-dashed border-rose-300 hover:bg-rose-500 hover:border-rose-500 py-2 px-3 rounded-xl transition-all font-semibold mb-4">
+                        ＋ 添加队伍 Add Group
+                    </button>
+
+                    <div class="bg-gray-50 rounded-xl p-3 mb-4 border border-gray-100">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex justify-between">
+                            <span>⏱️ 每组挑战限时:</span>
+                            <span class="text-rose-600 font-black" id="timeLimitLabel">90 秒</span>
+                        </label>
+                        <input type="range" id="timeLimitRange" min="30" max="300" step="10" value="90"
+                               class="w-full h-2 bg-rose-100 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                               oninput="updateTimeLimit(this.value)">
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>30s</span><span>150s</span><span>300s</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <button onclick="startGroupTurn()" id="startBtn"
+                                class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                            <span id="startBtnIcon">▶️</span>
+                            <span id="startBtnText">开始本组挑战</span>
+                        </button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="pauseResumeTimer()" id="pauseBtn" disabled
+                                    class="bg-amber-100 hover:bg-amber-200 text-amber-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-2 px-2 rounded-lg text-sm transition-colors">
+                                ⏸️ 暂停
+                            </button>
+                            <button onclick="resetBoardOnly()"
+                                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-2 rounded-lg text-sm transition-colors">
+                                🔄 打乱
+                            </button>
+                        </div>
+                        <button onclick="cancelTurn()" id="cancelBtn" disabled
+                                class="w-full bg-red-100 hover:bg-red-200 text-red-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-2 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2">
+                            🚫 取消本轮 (Cancel Run)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scoreboard -->
+                <div class="bg-gradient-to-br from-purple-900 to-indigo-900 text-white rounded-2xl p-4 shadow-lg">
+                    <h2 class="text-base font-bold mb-3 flex items-center justify-between border-b border-indigo-700/50 pb-2">
+                        <span>🏆 终极成绩排行榜</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="showFullscreenLeaderboard()" class="text-xs bg-indigo-700 hover:bg-indigo-500 text-indigo-200 hover:text-white px-2 py-0.5 rounded-full transition-colors" title="全屏显示">
+                                ⛶ 全屏
+                            </button>
+                            <span class="text-xs bg-indigo-700 text-indigo-200 px-2 py-0.5 rounded-full">可微调</span>
+                        </div>
+                    </h2>
+                    <div class="space-y-2" id="leaderboardList"></div>
+                    <div class="mt-4 pt-3 border-t border-indigo-700/50 text-center">
+                        <button onclick="resetWholeGame()"
+                                class="text-xs text-indigo-300 hover:text-white transition-colors underline underline-offset-4">
+                            🚨 重置所有分数 (Reset All)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- How to play -->
+                <div class="bg-white rounded-2xl border border-rose-100 p-4 shadow-sm text-sm text-gray-600">
+                    <h3 class="font-bold text-gray-900 mb-2">📋 游戏规则</h3>
+                    <ol class="space-y-1.5 list-decimal list-inside">
+                        <li>5个小组轮流派代表翻牌挑战。</li>
+                        <li>限时内翻开两张相同 Emoji 即配对成功！</li>
+                        <li>主持人可手动增减分数。</li>
+                        <li>所有组挑战完毕后查看排行榜决冠军！</li>
+                    </ol>
+                </div>
+
+            </div>
+        </aside>
+        </div>
+
+        <!-- Card Grid (fills all remaining space) -->
+        <main class="flex-1 overflow-hidden">
+            <div class="grid h-full w-full" style="grid-template-columns: repeat(4, minmax(0,1fr)); grid-template-rows: repeat(4, minmax(0,1fr));" id="cardGrid">
+                <!-- Cards populated by JS -->
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Fullscreen Leaderboard Overlay -->
+    <div id="fullscreenLeaderboard" class="fixed inset-0 z-50 hidden items-center justify-center bg-gradient-to-br from-purple-950 to-indigo-950 p-8">
+        <div class="w-full max-w-2xl">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-4xl font-black text-white">🏆 终极成绩排行榜</h2>
+                <button onclick="closeFullscreenLeaderboard()" class="text-indigo-300 hover:text-white text-3xl leading-none transition-colors">&times;</button>
+            </div>
+            <div id="fullscreenLeaderboardList" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- Countdown Overlay -->
+    <div id="countdownOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div id="countdownLabel" class="text-white font-black select-none" style="font-size: clamp(6rem, 20vw, 16rem); line-height:1;"></div>
+    </div>
+
+    <!-- Custom Dialog Modal (Replaces alert) -->
+    <div id="customModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-rose-100 transform scale-95 transition-transform duration-300" id="modalContainer">
+            <div class="text-center">
+                <span class="text-5xl block mb-4" id="modalEmoji">🎉</span>
+                <h3 class="text-2xl font-black text-gray-900 mb-2" id="modalTitle">标题</h3>
+                <p class="text-gray-600 mb-6" id="modalBody">这里是内容说明。</p>
+                <div class="flex space-x-3 justify-center">
+                    <button onclick="closeModal()" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-6 rounded-xl shadow-md transition-colors w-full">
+                        我知道了 (OK)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Synthesized sounds to avoid external dependency issues
+        let audioEnabled = true;
+        let audioCtx = null;
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'flip') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(150, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'match') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(330, now); // E4
+                    osc.frequency.setValueAtTime(440, now + 0.1); // A4
+                    osc.frequency.setValueAtTime(554, now + 0.2); // C#5
+                    osc.frequency.setValueAtTime(660, now + 0.3); // E5
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.setValueAtTime(0.15, now + 0.3);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                } else if (type === 'mismatch') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(120, now + 0.2);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'win') {
+                    // Ascending joyful fanfare
+                    const freqs = [523, 659, 784, 1046];
+                    freqs.forEach((f, i) => {
+                        const noteOsc = audioCtx.createOscillator();
+                        const noteGain = audioCtx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(audioCtx.destination);
+                        noteOsc.frequency.setValueAtTime(f, now + i * 0.1);
+                        noteGain.gain.setValueAtTime(0.15, now + i * 0.1);
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.2);
+                        noteOsc.start(now + i * 0.1);
+                        noteOsc.stop(now + i * 0.1 + 0.25);
+                    });
+                } else if (type === 'timeout') {
+                    // Low warning sound
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(100, now);
+                    osc.frequency.setValueAtTime(80, now + 0.3);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                }
+            } catch (e) {
+                console.log('Audio init failed or blocked:', e);
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            document.getElementById('audioIcon').innerText = audioEnabled ? '🔊' : '🔇';
+            document.getElementById('audioText').innerText = audioEnabled ? '音效' : '静音';
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('hidden')) {
+                sidebar.classList.replace('hidden', 'flex');
+            } else {
+                sidebar.classList.replace('flex', 'hidden');
+            }
+        }
+
+        function setDifficulty(level) {
+            if (isGameRunning) {
+                showModal('⚠️ 游戏进行中', '请先取消或结束当前挑战再切换难度。', '⚠️');
+                return;
+            }
+            difficulty = level;
+            const cfg = GRID_CONFIG[level];
+            activePairsCount = (cfg.cols * cfg.rows) / 2;
+            const btnNormal = document.getElementById('btnNormal');
+            const btnHard = document.getElementById('btnHard');
+            if (level === 'hard') {
+                btnHard.className = 'py-2.5 rounded-xl font-bold text-sm border-2 border-purple-500 bg-purple-600 text-white shadow transition-all';
+                btnNormal.className = 'py-2.5 rounded-xl font-bold text-sm border-2 border-gray-200 bg-gray-50 text-gray-600 transition-all hover:border-rose-400 hover:bg-rose-50 hover:text-rose-700';
+            } else {
+                btnNormal.className = 'py-2.5 rounded-xl font-bold text-sm border-2 border-rose-400 bg-rose-500 text-white shadow transition-all';
+                btnHard.className = 'py-2.5 rounded-xl font-bold text-sm border-2 border-gray-200 bg-gray-50 text-gray-600 transition-all hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700';
+            }
+            prepareBoard();
+        }
+
+        // Simplified Malaysian-Chinese Parent-themed Emojis with simple localized meaning cards
+        const emojiPool = [
+            { emoji: "💐", label: "康乃馨", desc: "感恩之花" },
+            { emoji: "👨‍👩‍👧‍👦", label: "全家福", desc: "合家平安" },
+            { emoji: "❤️", label: "爱你们", desc: "孝顺父母" },
+            { emoji: "🏠", label: "温馨家园", desc: "避风港湾" },
+            { emoji: "🍲", label: "团圆饭", desc: "美味佳肴" },
+            { emoji: "🎁", label: "爱心礼物", desc: "感恩送礼" },
+            { emoji: "🍵", label: "陪爸妈喝茶", desc: "一齐Yamcha" },
+            { emoji: "📸", label: "幸福合照", desc: "留住美好" },
+            { emoji: "👴", label: "慈祥爸爸", desc: "父爱如山" },
+            { emoji: "👵", label: "温柔妈妈", desc: "母爱伟大" },
+            { emoji: "🍰", label: "庆祝蛋糕", desc: "节日快乐" },
+            { emoji: "🍍", label: "旺来黄梨", desc: "好运连连" },
+            { emoji: "🌟", label: "闪亮明星", desc: "出类拔萃" },
+            { emoji: "🎶", label: "欢乐歌声", desc: "载歌载舞" },
+            { emoji: "🌈", label: "彩虹祝福", desc: "幸福美满" },
+            { emoji: "🕊️", label: "和平鸽子", desc: "家庭和睦" },
+            { emoji: "🌺", label: "美丽花朵", desc: "花开富贵" },
+            { emoji: "🦋", label: "翩翩蝴蝶", desc: "自由快乐" },
+            { emoji: "🍬", label: "甜蜜糖果", desc: "甜蜜甜蜜" },
+            { emoji: "🎠", label: "欢乐旋转", desc: "童心未泯" },
+        ];
+
+
+        const GRID_CONFIG = {
+            normal: { cols: 4, rows: 7 },  // 4×4 = 16 cards = 8 pairs
+            hard:   { cols: 4, rows: 10 },  // 4×10 = 40 cards = 20 pairs
+        };
+
+        // ─────────────────────────────────────────────
+        // GROUP CONFIG — add/remove/rename entries to change groups.
+        // ─────────────────────────────────────────────
+        let GROUP_CONFIG = [
+            { id: 1, name: "第一组 (Group 1)" },
+            { id: 2, name: "第二组 (Group 2)" },
+            { id: 3, name: "第三组 (Group 3)" },
+            { id: 4, name: "第四组 (Group 4)" },
+            { id: 5, name: "第五组 (Group 5)" },
+            { id: 6, name: "第六组 (Group 6)" },
+            { id: 7, name: "第七组 (Group 7)" },    
+        ];
+        // ─────────────────────────────────────────────
+
+        function makeGroups() {
+            return GROUP_CONFIG.map(g => ({ ...g, score: 0, timeUsed: 0, status: 'pending' }));
+        }
+
+        let difficulty = 'normal';
+        let activePairsCount = (GRID_CONFIG.normal.cols * GRID_CONFIG.normal.rows) / 2;
+
+
+        let groups = makeGroups();
+
+        let activeGroupId = GROUP_CONFIG[0].id;
+        let timeLimit = 90; // Default seconds
+        let timerVal = timeLimit;
+        let timerInterval = null;
+        let timerIsPaused = false;
+
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairsCount = 0;
+        let isChecking = false;
+        let isGameRunning = false;
+
+        window.onload = function() {
+            // Populate difficulty button labels from config
+            ['normal','hard'].forEach(lvl => {
+                const c = GRID_CONFIG[lvl];
+                document.getElementById(`label${lvl.charAt(0).toUpperCase()+lvl.slice(1)}`).textContent =
+                    `${c.cols}×${c.rows} · ${(c.cols*c.rows)/2} 对`;
+            });
+            // Set group count badge
+            document.getElementById('groupCountBadge').textContent = `${GROUP_CONFIG.length}组轮流`;
+            loadScoresFromStorage();
+            initGroupSelector();
+            updateLeaderboard();
+            prepareBoard();
+        };
+
+        // Initialize Group Select UI
+        function initGroupSelector() {
+            const container = document.getElementById('groupsContainer');
+            container.innerHTML = '';
+            
+            groups.forEach(g => {
+                let statusBadge = '';
+                let bgStyle = 'bg-white hover:bg-rose-50 text-gray-700 border-gray-100';
+                
+                if (g.id === activeGroupId) {
+                    bgStyle = 'bg-rose-50 border-rose-400 text-rose-700 ring-2 ring-rose-400/50';
+                }
+
+                if (g.status === 'completed') {
+                    statusBadge = `<span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">已挑战 √</span>`;
+                } else if (g.status === 'playing') {
+                    statusBadge = `<span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded animate-pulse">进行中...</span>`;
+                } else {
+                    statusBadge = `<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded">等待中</span>`;
+                }
+
+                const removeBtn = groups.length > 1
+                    ? `<button onclick="event.stopPropagation(); removeGroup(${g.id})" class="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:bg-red-100 hover:text-red-600 transition-colors text-xs font-bold shrink-0" title="删除此队伍">✕</button>`
+                    : '';
+
+                container.innerHTML += `
+                    <div onclick="selectGroup(${g.id})" class="flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${bgStyle}">
+                        <div class="flex items-center space-x-3 min-w-0">
+                            <span class="text-lg shrink-0">${g.id === activeGroupId ? '🎯' : '👥'}</span>
+                            <span class="font-bold text-sm truncate">${g.name}</span>
+                        </div>
+                        <div class="flex items-center space-x-2 shrink-0">
+                            ${statusBadge}
+                            <span class="bg-rose-100 text-rose-800 font-black text-xs px-2.5 py-1 rounded-full">${g.score} 对</span>
+                            ${removeBtn}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Update header live display
+            const activeG = groups.find(g => g.id === activeGroupId);
+            document.getElementById('activeGroupDisplay').innerText = activeG ? `🎯 当前挑战队伍：${activeG.name}` : '请选择一个队伍开始挑战';
+            document.getElementById('timerDisplay').innerText = formatTime(timerVal);
+        }
+
+        // Selection event
+        function selectGroup(id) {
+            if (isGameRunning) {
+                showModal('⚠️ 游戏进行中', '当前小组挑战正在进行，无法中途切换。请先暂停或等待挑战结束！', '⚠️');
+                return;
+            }
+            activeGroupId = id;
+            initGroupSelector();
+            prepareBoard();
+        }
+
+        // Setup the localized Malaysian Chinese time limit slider
+        function updateTimeLimit(val) {
+            if (isGameRunning) return;
+            timeLimit = parseInt(val);
+            timerVal = timeLimit;
+            document.getElementById('timeLimitLabel').innerText = `${timeLimit} 秒`;
+            document.getElementById('timerDisplay').innerText = formatTime(timerVal);
+        }
+
+        // Prep a new set of shuffled emoji pairs
+        function prepareBoard() {
+            // Guard: pool must have enough unique emoji for the required pairs
+            if (activePairsCount > emojiPool.length) {
+                showModal(
+                    '⚠️ 图标不够',
+                    `当前难度需要 ${activePairsCount} 对，但 emojiPool 只有 ${emojiPool.length} 个图标。请在代码中增加更多图标，或减小 GRID_CONFIG 的格子数。`,
+                    '⚠️'
+                );
+                return;
+            }
+
+            // Pick a slice of emoji objects
+            const selectedPool = emojiPool.slice(0, activePairsCount);
+            
+            // Duplicate to create pairs
+            let cardSet = [];
+            selectedPool.forEach((item, index) => {
+                cardSet.push({ id: index, emoji: item.emoji, label: item.label, desc: item.desc, isFlipped: false, isMatched: false });
+                cardSet.push({ id: index, emoji: item.emoji, label: item.label, desc: item.desc, isFlipped: false, isMatched: false });
+            });
+
+            // Fisher-Yates Shuffle
+            for (let i = cardSet.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cardSet[i], cardSet[j]] = [cardSet[j], cardSet[i]];
+            }
+
+            cards = cardSet;
+            flippedCards = [];
+            matchedPairsCount = 0;
+            isChecking = false;
+
+            // Apply grid dimensions from GRID_CONFIG
+            const cfg = GRID_CONFIG[difficulty];
+            const grid = document.getElementById('cardGrid');
+            grid.style.gridTemplateColumns = `repeat(${cfg.cols}, minmax(0,1fr))`;
+            grid.style.gridTemplateRows    = `repeat(${cfg.rows}, minmax(0,1fr))`;
+
+
+            renderBoard();
+            updateProgressBar();
+        }
+
+        function renderBoard() {
+            const grid = document.getElementById('cardGrid');
+            grid.innerHTML = '';
+
+            cards.forEach((card, idx) => {
+                const cardStateClass = card.isFlipped || card.isMatched ? 'flipped' : '';
+                grid.innerHTML += `
+                    <div id="card-${idx}" onclick="cardClicked(${idx})" class="perspective-1000 w-full h-full cursor-pointer ${cardStateClass}">
+                        <div class="flip-card-inner relative w-full h-full text-center transition-all duration-500 rounded-2xl shadow-sm border-2">
+                            <div class="backface-hidden absolute inset-0 w-full h-full rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white flex flex-col items-center justify-center p-2 border-2 border-white/20 select-none">
+                                <span class="text-3xl md:text-4xl filter drop-shadow">💝</span>
+                                <span class="text-[10px] md:text-xs font-semibold tracking-widest text-pink-200 mt-1">双亲节快乐</span>
+                            </div>
+                            <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-2xl bg-white flex flex-col items-center justify-center p-1 border-4 ${card.isMatched ? 'border-emerald-400 bg-emerald-50/50' : 'border-rose-400'}">
+                                <span class="text-4xl md:text-5xl my-auto select-none">${card.emoji}</span>
+                                <span class="text-[11px] md:text-xs font-black text-rose-600">${card.label}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderCard(idx) {
+            const el = document.getElementById(`card-${idx}`);
+            if (!el) return;
+            const card = cards[idx];
+            const cardStateClass = card.isFlipped || card.isMatched ? 'flipped' : '';
+            el.outerHTML = `
+                <div id="card-${idx}" onclick="cardClicked(${idx})" class="perspective-1000 w-full h-full cursor-pointer ${cardStateClass}">
+                    <div class="flip-card-inner relative w-full h-full text-center transition-all duration-500 rounded-2xl shadow-sm border-2">
+                        <div class="backface-hidden absolute inset-0 w-full h-full rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white flex flex-col items-center justify-center p-2 border-2 border-white/20 select-none">
+                            <span class="text-3xl md:text-4xl filter drop-shadow">💝</span>
+                            <span class="text-[10px] md:text-xs font-semibold tracking-widest text-pink-200 mt-1">双亲节快乐</span>
+                        </div>
+                        <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-2xl bg-white flex flex-col items-center justify-center p-1 border-4 ${card.isMatched ? 'border-emerald-400 bg-emerald-50/50' : 'border-rose-400'}">
+                            <span class="text-4xl md:text-5xl my-auto select-none">${card.emoji}</span>
+                            <span class="text-[11px] md:text-xs font-black text-rose-600">${card.label}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function cardClicked(idx) {
+            // Guard conditions
+            if (!isGameRunning) {
+                showModal('💡 提示', '请先点击左侧的【开始本组挑战】以开启本回合计时！', '⏱️');
+                return;
+            }
+            if (isChecking) return;
+            if (cards[idx].isFlipped || cards[idx].isMatched) return;
+
+            // Flip card
+            cards[idx].isFlipped = true;
+            flippedCards.push(idx);
+            playSound('flip');
+            renderCard(idx);
+
+            // Check if we flipped 2 cards
+            if (flippedCards.length === 2) {
+                isChecking = true;
+                setTimeout(checkMatch, 700);
+            }
+        }
+
+        function checkMatch() {
+            const [idx1, idx2] = flippedCards;
+            
+            if (cards[idx1].id === cards[idx2].id) {
+                // MATCH SUCCESSFUL
+                cards[idx1].isMatched = true;
+                cards[idx2].isMatched = true;
+                matchedPairsCount++;
+                playSound('match');
+
+                // Instantly update active group's live progress tally 
+                const activeG = groups.find(g => g.id === activeGroupId);
+                if (activeG) {
+                    activeG.score = matchedPairsCount;
+                    saveScoresToStorage();
+                    initGroupSelector();
+                    updateLeaderboard();
+                }
+
+                // If all 8 pairs matched - Auto win before timer finishes!
+                if (matchedPairsCount === activePairsCount) {
+                    handleTurnVictory();
+                }
+            } else {
+                // MISMATCH
+                cards[idx1].isFlipped = false;
+                cards[idx2].isFlipped = false;
+                playSound('mismatch');
+            }
+
+            flippedCards = [];
+            isChecking = false;
+            renderCard(idx1);
+            renderCard(idx2);
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            const percentage = (matchedPairsCount / activePairsCount) * 100;
+            document.getElementById('matchProgressBar').style.width = `${percentage}%`;
+            document.getElementById('progressText').innerText = `${matchedPairsCount} / ${activePairsCount} 对`;
+        }
+
+        // Timer Logic
+        function startGroupTurn() {
+            if (isGameRunning) return;
+
+            // Hide sidebar for maximum board visibility
+            document.getElementById('sidebar').classList.replace('flex', 'hidden');
+
+            // Reset current board for a completely fresh start for this group
+            prepareBoard();
+
+            const activeG = groups.find(g => g.id === activeGroupId);
+            if (!activeG) return;
+
+            // Set state to active playing
+            activeG.status = 'playing';
+            activeG.score = 0;
+            timerVal = timeLimit;
+            timerIsPaused = false;
+            initGroupSelector();
+
+            // Disable controls during countdown
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('cancelBtn').disabled = true;
+
+            // Run 3-2-1-GO countdown, then start the actual timer
+            runCountdown(['3','2','1','GO!'], () => {
+                isGameRunning = true;
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('cancelBtn').disabled = false;
+                playSound('flip');
+
+                clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    if (!timerIsPaused) {
+                        timerVal--;
+                        document.getElementById('timerDisplay').innerText = formatTime(timerVal);
+                        if (timerVal <= 10) {
+                            document.getElementById('timerDisplay').classList.add('text-red-500', 'animate-pulse');
+                        } else {
+                            document.getElementById('timerDisplay').classList.remove('text-red-500', 'animate-pulse');
+                        }
+                        if (timerVal <= 0) handleTurnTimeout();
+                    }
+                }, 1000);
+            });
+        }
+
+        function runCountdown(steps, onComplete) {
+            const overlay = document.getElementById('countdownOverlay');
+            const label = document.getElementById('countdownLabel');
+            overlay.classList.replace('hidden', 'flex');
+
+            let i = 0;
+            function showStep() {
+                if (i >= steps.length) {
+                    overlay.classList.replace('flex', 'hidden');
+                    onComplete();
+                    return;
+                }
+                const text = steps[i++];
+                const isGo = text === 'GO!';
+                label.style.fontSize = isGo ? 'clamp(4rem, 15vw, 12rem)' : 'clamp(6rem, 20vw, 16rem)';
+                label.style.color = isGo ? '#fbbf24' : 'white';
+                label.textContent = text;
+                // Re-trigger animation by cloning
+                label.classList.remove('countdown-pop');
+                void label.offsetWidth;
+                label.classList.add('countdown-pop');
+                setTimeout(showStep, 850);
+            }
+            showStep();
+        }
+
+        function pauseResumeTimer() {
+            if (!isGameRunning) return;
+            timerIsPaused = !timerIsPaused;
+            
+            const pauseBtn = document.getElementById('pauseBtn');
+            if (timerIsPaused) {
+                pauseBtn.innerText = '▶️ 继续计时';
+                pauseBtn.classList.replace('bg-amber-100', 'bg-emerald-100');
+                pauseBtn.classList.replace('text-amber-800', 'text-emerald-800');
+            } else {
+                pauseBtn.innerText = '⏸️ 暂停时间';
+                pauseBtn.classList.replace('bg-emerald-100', 'bg-amber-100');
+                pauseBtn.classList.replace('text-emerald-800', 'text-amber-800');
+            }
+        }
+
+        function resetBoardOnly() {
+            if (isGameRunning && !confirm('当前队伍挑战中。重新打乱卡牌会清空他们已经配对好的记录。确定重新打乱吗？')) {
+                return;
+            }
+            prepareBoard();
+        }
+
+        function handleTurnVictory() {
+            stopTurnIntervals();
+            playSound('win');
+
+            const activeG = groups.find(g => g.id === activeGroupId);
+            if (activeG) {
+                activeG.status = 'completed';
+                activeG.timeUsed = timeLimit - timerVal;
+                saveScoresToStorage();
+            }
+
+            showModal('🏆 太棒了！全部配对成功！', `${activeG.name} 表现优异！在短时间内配对全部 ${activePairsCount} 对 Emoji！真是太有默契了！请主持人在左下角手动登记并确认分数。`, '🥳');
+            document.getElementById('sidebar').classList.replace('hidden', 'flex');
+            
+            // Move pointer to next group automatically
+            autoAdvanceGroup();
+        }
+
+        function handleTurnTimeout() {
+            stopTurnIntervals();
+            playSound('timeout');
+
+            // Reveal all unmatched cards
+            cards.forEach((card, idx) => {
+                if (!card.isMatched) {
+                    card.isFlipped = true;
+                    renderCard(idx);
+                }
+            });
+
+            const activeG = groups.find(g => g.id === activeGroupId);
+            if (activeG) {
+                activeG.status = 'completed';
+                activeG.timeUsed = timeLimit;
+                saveScoresToStorage();
+            }
+
+            showModal('⏱️ 时间到！挑战结束', `时间已经用完！${activeG.name} 成功拿下了 ${matchedPairsCount} 对 Emoji 积分！做得很好！👏`, '⏰');
+            
+            // Move pointer to next group automatically
+            autoAdvanceGroup();
+        }
+
+        function addGroup() {
+            if (isGameRunning) {
+                showModal('⚠️ 游戏进行中', '请先取消或结束当前挑战再添加队伍。', '⚠️');
+                return;
+            }
+            const newId = Math.max(...GROUP_CONFIG.map(g => g.id)) + 1;
+            const newEntry = { id: newId, name: `第${newId}组 (Group ${newId})` };
+            GROUP_CONFIG.push(newEntry);
+            groups.push({ ...newEntry, score: 0, timeUsed: 0, status: 'pending' });
+            document.getElementById('groupCountBadge').textContent = `${GROUP_CONFIG.length}组轮流`;
+            initGroupSelector();
+            updateLeaderboard();
+        }
+
+        function removeGroup(id) {
+            if (isGameRunning) {
+                showModal('⚠️ 游戏进行中', '请先取消或结束当前挑战再删除队伍。', '⚠️');
+                return;
+            }
+            if (GROUP_CONFIG.length <= 1) {
+                showModal('⚠️ 无法删除', '至少保留一个队伍！', '⚠️');
+                return;
+            }
+            const cfgIdx = GROUP_CONFIG.findIndex(g => g.id === id);
+            const grpIdx = groups.findIndex(g => g.id === id);
+            if (cfgIdx !== -1) GROUP_CONFIG.splice(cfgIdx, 1);
+            if (grpIdx !== -1) groups.splice(grpIdx, 1);
+            if (activeGroupId === id) activeGroupId = GROUP_CONFIG[0].id;
+            document.getElementById('groupCountBadge').textContent = `${GROUP_CONFIG.length}组轮流`;
+            initGroupSelector();
+            updateLeaderboard();
+        }
+
+        function autoAdvanceGroup() {
+            const ids = GROUP_CONFIG.map(g => g.id);
+            const currentIdx = ids.indexOf(activeGroupId);
+            activeGroupId = ids[(currentIdx + 1) % ids.length];
+            initGroupSelector();
+            updateLeaderboard();
+        }
+
+        function stopTurnIntervals() {
+            isGameRunning = false;
+            clearInterval(timerInterval);
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('startBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').innerText = '⏸️ 暂停时间';
+            document.getElementById('pauseBtn').className = 'bg-amber-100 hover:bg-amber-200 text-amber-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-2 px-3 rounded-lg text-sm transition-colors';
+            document.getElementById('cancelBtn').disabled = true;
+            
+            document.getElementById('timerDisplay').classList.remove('text-red-500', 'animate-pulse');
+        }
+
+        function cancelTurn() {
+            if (!isGameRunning) return;
+            stopTurnIntervals();
+
+            // Revert group status to pending and clear any score from this run
+            const activeG = groups.find(g => g.id === activeGroupId);
+            if (activeG) {
+                activeG.status = 'pending';
+                activeG.score = 0;
+                activeG.timeUsed = 0;
+            }
+
+            // Reset board and UI
+            prepareBoard();
+            document.getElementById('timerDisplay').innerText = formatTime(timeLimit);
+            initGroupSelector();
+            updateLeaderboard();
+        }
+
+        // Score Tally & Manual Adjustments (Crucial for host flexibility!)
+        function changeScore(groupId, offset) {
+            const g = groups.find(x => x.id === groupId);
+            if (g) {
+                let newScore = g.score + offset;
+                if (newScore < 0) newScore = 0;
+                if (newScore > activePairsCount) newScore = activePairsCount;
+                g.score = newScore;
+                
+                // If manual adjustments are made, update current status if needed
+                if (g.status === 'pending') {
+                    g.status = 'completed';
+                }
+                
+                saveScoresToStorage();
+                initGroupSelector();
+                updateLeaderboard();
+            }
+        }
+
+        function updateLeaderboard() {
+            const listContainer = document.getElementById('leaderboardList');
+            listContainer.innerHTML = '';
+
+            // Sort groups by score (descending), then by faster time (ascending) as a tie-breaker
+            const sorted = [...groups].sort((a, b) => {
+                if (b.score !== a.score) {
+                    return b.score - a.score;
+                }
+                // Faster time wins tie
+                return a.timeUsed - b.timeUsed;
+            });
+
+            sorted.forEach((g, rank) => {
+                let rankIcon = '🔸';
+                let rowBg = 'bg-indigo-950/30';
+                if (rank === 0) { rankIcon = '🥇 冠军'; rowBg = 'bg-yellow-500/20 border border-yellow-400/40 text-yellow-100'; }
+                else if (rank === 1) { rankIcon = '🥈 亚军'; rowBg = 'bg-slate-300/10 border border-slate-300/20'; }
+                else if (rank === 2) { rankIcon = '🥉 季军'; rowBg = 'bg-amber-700/10 border border-amber-600/20'; }
+
+                let timeText = g.status === 'pending' ? '--' : `${g.timeUsed}秒`;
+
+                listContainer.innerHTML += `
+                    <div class="flex flex-col md:flex-row items-center justify-between p-3 rounded-xl ${rowBg} gap-3">
+                        <div class="flex items-center space-x-3 w-full md:w-auto">
+                            <span class="font-bold text-xs text-indigo-300 min-w-[50px]">${rankIcon}</span>
+                            <span class="font-black text-sm">${g.name}</span>
+                        </div>
+                        <div class="flex items-center justify-between md:justify-end w-full md:w-auto space-x-4">
+                            <div class="text-xs text-indigo-200">
+                                用时: <span class="font-mono text-white font-bold">${timeText}</span>
+                            </div>
+                            
+                            <!-- Interactive Host Tally Control Panel -->
+                            <div class="flex items-center space-x-2 bg-indigo-950/50 p-1 rounded-lg border border-indigo-700">
+                                <button onclick="changeScore(${g.id}, -1)" class="w-7 h-7 bg-indigo-800 hover:bg-rose-600 rounded flex items-center justify-center font-black transition-colors" title="减一分">-</button>
+                                <span class="font-black text-lg text-yellow-300 px-2 min-w-[28px] text-center">${g.score}</span>
+                                <button onclick="changeScore(${g.id}, 1)" class="w-7 h-7 bg-indigo-800 hover:bg-emerald-600 rounded flex items-center justify-center font-black transition-colors" title="加一分">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Reset full game
+        function resetWholeGame() {
+            if (!confirm('您确定要重置所有小组的成绩和分数吗？此操作无法撤销。')) {
+                return;
+            }
+            
+            groups = makeGroups();
+
+            activeGroupId = GROUP_CONFIG[0].id;
+            stopTurnIntervals();
+            saveScoresToStorage();
+            initGroupSelector();
+            updateLeaderboard();
+            prepareBoard();
+            
+            showModal('🔄 数据已清空', '所有组别成绩均已完成重置。可以开始新一轮的欢乐比赛！', '👍');
+        }
+
+        // Time Formatter
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Save scores to LocalStorage so state survives refreshes
+        function saveScoresToStorage() {
+            try {
+                localStorage.setItem('parents_day_scores', JSON.stringify(groups));
+                localStorage.setItem('parents_day_active_id', activeGroupId);
+            } catch(e) {}
+        }
+
+        // Load scores from LocalStorage
+        function loadScoresFromStorage() {
+            try {
+                const stored = localStorage.getItem('parents_day_scores');
+                if (stored) {
+                    const saved = JSON.parse(stored);
+                    // Merge saved scores into fresh groups — ignore stale/extra entries
+                    groups = makeGroups().map(g => {
+                        const match = saved.find(s => s.id === g.id);
+                        return match ? { ...g, score: match.score, timeUsed: match.timeUsed, status: match.status } : g;
+                    });
+                }
+                const storedActive = localStorage.getItem('parents_day_active_id');
+                if (storedActive) {
+                    const id = parseInt(storedActive);
+                    // Only restore if the id still exists in GROUP_CONFIG
+                    if (GROUP_CONFIG.find(g => g.id === id)) activeGroupId = id;
+                }
+            } catch(e) {}
+        }
+
+        // Modals overlay controls
+        function showModal(title, body, emoji = '🎉') {
+            document.getElementById('modalEmoji').innerText = emoji;
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerText = body;
+            
+            const modal = document.getElementById('customModal');
+            modal.classList.replace('hidden', 'flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            modal.classList.replace('flex', 'hidden');
+        }
+
+        function showFullscreenLeaderboard() {
+            const sorted = [...groups].sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return a.timeUsed - b.timeUsed;
+            });
+
+            const medals = ['🥇', '🥈', '🥉'];
+            const rowStyles = [
+                'bg-yellow-500/20 border border-yellow-400/40',
+                'bg-slate-300/10 border border-slate-300/20',
+                'bg-amber-700/10 border border-amber-600/20',
+                'bg-indigo-950/40 border border-indigo-700/20',
+                'bg-indigo-950/40 border border-indigo-700/20',
+            ];
+
+            const list = document.getElementById('fullscreenLeaderboardList');
+            list.innerHTML = '';
+            sorted.forEach((g, rank) => {
+                const medal = medals[rank] || `#${rank + 1}`;
+                const timeText = g.status === 'pending' ? '--' : `${g.timeUsed}s`;
+                list.innerHTML += `
+                    <div class="flex items-center justify-between px-6 py-5 rounded-2xl ${rowStyles[rank]}">
+                        <div class="flex items-center gap-5">
+                            <span class="text-4xl">${medal}</span>
+                            <span class="text-2xl font-black text-white">${g.name}</span>
+                        </div>
+                        <div class="flex items-center gap-6 text-right">
+                            <div class="text-indigo-300 text-sm">用时<br><span class="font-mono text-white font-bold text-base">${timeText}</span></div>
+                            <div class="text-indigo-300 text-sm">配对<br><span class="font-black text-yellow-300 text-3xl">${g.score}</span></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('fullscreenLeaderboard').classList.replace('hidden', 'flex');
+        }
+
+        function closeFullscreenLeaderboard() {
+            document.getElementById('fullscreenLeaderboard').classList.replace('flex', 'hidden');
+        }
+    </script>
+</body>
+</html>

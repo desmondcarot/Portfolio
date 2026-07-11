@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MYF — Emmanuel Methodist Church</title>
+
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    
+    :root {
+      --cream:        #FFF8F0;
+      --warm-bg:      #FFFAF5;
+      --orange:       #F97316;
+      --orange-light: #FB923C;
+      --amber:        #F59E0B;
+      --brown-900:    #1C1917;
+      --brown-800:    #292524;
+      --brown-600:    #57534E;
+      --brown-400:    #78716C;
+      --text-primary: #1C1917;
+      --text-muted:   #78716C;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--warm-bg);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+    
+    
+    .scene { position: relative; }
+
+    .stage {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    
+    #progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--orange), var(--amber));
+      z-index: 500;
+      width: 0%;
+      transition: width 0.08s linear;
+    }
+
+    
+    .site-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 400;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2.5rem;
+      transition: background 0.4s, box-shadow 0.4s;
+    }
+    .site-nav.scrolled {
+      background: rgba(255,248,240,0.92);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 1px 0 rgba(249,115,22,0.12);
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--orange);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      margin: 0; padding: 0;
+    }
+    .nav-links a {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--brown-600);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--orange); }
+
+    
+    .btn-warm {
+      display: inline-block;
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .btn-warm:hover { transform: translateY(-2px); }
+
+    .btn-warm-solid {
+      background: var(--orange);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(249,115,22,0.35);
+    }
+    .btn-warm-solid:hover { background: var(--orange-light); color: #fff; box-shadow: 0 6px 24px rgba(249,115,22,0.4); }
+
+    .btn-warm-ghost {
+      background: transparent;
+      color: rgba(255,255,255,0.8);
+      border: 1.5px solid rgba(255,255,255,0.3);
+    }
+    .btn-warm-ghost:hover { border-color: var(--orange-light); color: var(--orange-light); }
+
+    
+    .eyebrow {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 0.6rem;
+    }
+    .section-h {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin: 0 0 1.5rem;
+    }
+
+    
+    #scene-hero { height: 250vh; }
+
+    #scene-hero .stage {
+      background: linear-gradient(155deg, #1C1917 0%, #2D1605 50%, #1C1917 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    
+    .hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+    }
+    .hero-orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(249,115,22,0.28) 0%, transparent 70%);
+      top: 5%; left: -8%;
+    }
+    .hero-orb-2 {
+      width: 360px; height: 360px;
+      background: radial-gradient(circle, rgba(245,158,11,0.2) 0%, transparent 70%);
+      bottom: 10%; right: 5%;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+      padding: 0 2rem;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--orange-light);
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.9s, transform 0.9s;
+    }
+    .hero-eyebrow.in { opacity: 1; transform: translateY(0); }
+
+    .hero-title {
+      font-size: clamp(3rem, 9vw, 6.5rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.0;
+      margin: 0.75rem 0;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.9s 0.1s, transform 0.9s 0.1s;
+    }
+    .hero-title.in { opacity: 1; transform: translateY(0); }
+    .hero-title span { color: var(--orange-light); }
+
+    .hero-church {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      font-weight: 300;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.9s 0.2s, transform 0.9s 0.2s;
+    }
+    .hero-church.in { opacity: 1; transform: translateY(0); }
+
+    .hero-tagline {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(1rem, 2.2vw, 1.25rem);
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      transition: opacity 0.9s 0.3s;
+    }
+    .hero-tagline.in { opacity: 1; }
+
+    .hero-ctas {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.9s 0.4s, transform 0.9s 0.4s;
+    }
+    .hero-ctas.in { opacity: 1; transform: translateY(0); }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      z-index: 2;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.2);
+      opacity: 0;
+      transition: opacity 0.9s 1.2s;
+    }
+    .scroll-hint.in { opacity: 1; }
+    .scroll-arrow { animation: nudge 2s ease-in-out infinite; }
+    @keyframes nudge { 0%,100%{transform:translateY(0)} 50%{transform:translateY(7px)} }
+
+    
+    #hero-bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--warm-bg);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    
+    #scene-sunday { height: 200vh; }
+
+    #scene-sunday .stage {
+      background: var(--warm-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sunday-inner {
+      max-width: 680px;
+      width: 100%;
+      padding: 0 2rem;
+    }
+
+    .sunday-header {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s, transform 0.6s;
+    }
+    .sunday-header.in { opacity: 1; transform: translateY(0); }
+
+    
+    .tl-item {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.75rem;
+      opacity: 0;
+      transform: translateX(-28px);
+      transition: opacity 0.6s, transform 0.6s;
+    }
+    .tl-item.in { opacity: 1; transform: translateX(0); }
+
+    .tl-time {
+      min-width: 88px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--orange);
+      letter-spacing: 0.04em;
+      padding-top: 0.2rem;
+    }
+
+    .tl-body {
+      position: relative;
+      padding-left: 1.4rem;
+      border-left: 2px solid rgba(249,115,22,0.18);
+    }
+    .tl-body::before {
+      content: '';
+      position: absolute;
+      left: -5px; top: 0.45rem;
+      width: 8px; height: 8px;
+      background: var(--orange);
+      border-radius: 50%;
+    }
+    .tl-body h4 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+    }
+    .tl-body p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    .sunday-note {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, rgba(249,115,22,0.07), rgba(245,158,11,0.07));
+      border-left: 3px solid var(--orange);
+      border-radius: 0 8px 8px 0;
+      font-size: 0.875rem;
+      color: var(--brown-600);
+      font-style: italic;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+    .sunday-note.in { opacity: 1; }
+
+    
+    #scene-about { height: 450vh; }
+
+    #scene-about .stage {
+      background: var(--brown-900);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .about-inner {
+      max-width: 900px;
+      width: 100%;
+      padding: 0 2rem;
+    }
+
+    .about-intro { opacity: 0; transition: opacity 0.7s; }
+    .about-body  { opacity: 0; transition: opacity 0.7s 0.1s; }
+
+    .about-text {
+      font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+      color: rgba(255,255,255,0.55);
+      line-height: 1.85;
+      max-width: 580px;
+      margin-bottom: 2.5rem;
+    }
+
+    .vision-card {
+      background: linear-gradient(135deg, rgba(249,115,22,0.1), rgba(245,158,11,0.06));
+      border: 1px solid rgba(249,115,22,0.22);
+      border-radius: 16px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.7s 0.2s, transform 0.7s 0.2s;
+    }
+    .vision-card.in { opacity: 1; transform: translateY(0); }
+
+    .vision-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--orange-light);
+      margin-bottom: 0.6rem;
+    }
+    .vision-quote {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(1rem, 2.2vw, 1.35rem);
+      color: #fff;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+    .pillar {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 1.5rem 1.25rem;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s, transform 0.6s;
+    }
+    .pillar.in { opacity: 1; transform: translateY(0); }
+
+    .pillar-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+    .pillar h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--orange-light);
+      margin: 0 0 0.4rem;
+    }
+    .pillar p { font-size: 0.8rem; color: rgba(255,255,255,0.38); margin: 0; line-height: 1.6; }
+
+    
+    #scene-activities { height: 300vh; }
+
+    #scene-activities .stage {
+      background: var(--warm-bg);
+    }
+
+    
+    .act-dots {
+      position: absolute;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      z-index: 10;
+    }
+    .act-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: rgba(249,115,22,0.2);
+      transition: background 0.3s, transform 0.3s;
+    }
+    .act-dot.active { background: var(--orange); transform: scale(1.5); }
+
+    
+    .act-shot {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.65s, transform 0.65s;
+      pointer-events: none;
+    }
+    .act-shot.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+    
+    .act-header {
+      text-align: center;
+      max-width: 620px;
+      padding: 0 2rem;
+    }
+    .act-header .section-h { font-size: clamp(2.2rem, 5vw, 3.8rem); }
+    .act-header p { color: var(--text-muted); font-size: 1rem; line-height: 1.75; margin: 0; }
+
+    
+    .act-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3.5rem;
+      max-width: 1080px;
+      padding: 0 3rem;
+      align-items: center;
+    }
+    .act-layout.flip { direction: rtl; }
+    .act-layout.flip > * { direction: ltr; }
+
+    .act-text .eyebrow { margin-bottom: 0.5rem; }
+    .act-text h2 {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 700;
+      margin: 0 0 1rem;
+      line-height: 1.2;
+    }
+    .act-text p {
+      font-size: 0.93rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 1.25rem;
+    }
+    .act-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .tag {
+      padding: 0.3rem 0.8rem;
+      background: rgba(249,115,22,0.1);
+      color: #c2410c;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+
+    
+    .act-imgs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 0.65rem;
+    }
+    .act-img {
+      border-radius: 12px;
+      overflow: hidden;
+      background: #e8d5c0;
+    }
+    .act-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .act-img-main {
+      grid-row: 1 / span 2;
+      aspect-ratio: 3/4;
+    }
+    .act-img-sm { aspect-ratio: 4/3; }
+
+    
+    #scene-people {
+      background: var(--brown-800);
+      padding: 6rem 0 5rem;
+    }
+
+    .people-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+    }
+    .person-card {
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .person-card.in { opacity: 1; transform: translateY(0); }
+
+    .person-avatar {
+      width: 76px; height: 76px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin: 0 auto 1rem;
+      background: #44403C;
+    }
+    .person-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .person-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.92rem; font-weight: 600; color: #fff; margin: 0 0 0.25rem; }
+    .person-role { font-size: 0.78rem; color: var(--orange-light); margin: 0; }
+
+    
+    #scene-newcomer {
+      background: var(--warm-bg);
+      padding: 6rem 0 5rem;
+    }
+
+    .faq-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+    }
+    .faq-card {
+      background: #fff;
+      border: 1px solid rgba(249,115,22,0.1);
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 2px 18px rgba(0,0,0,0.05);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .faq-card.in { opacity: 1; transform: translateY(0); }
+    .faq-q { font-size: 0.72rem; font-weight: 700; color: var(--orange); text-transform: uppercase; letter-spacing: 0.12em; margin: 0 0 0.45rem; }
+    .faq-a-title { font-size: 1.05rem; font-weight: 600; margin: 0 0 0.45rem; }
+    .faq-a-body { font-size: 0.875rem; color: var(--text-muted); margin: 0; line-height: 1.7; }
+
+    
+    #scene-join {
+      background: var(--brown-900);
+      padding: 6rem 0 5rem;
+    }
+
+    .join-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 2.5rem;
+      align-items: start;
+    }
+
+    .join-info-item {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .join-info-item.in { opacity: 1; transform: translateX(0); }
+
+    .join-icon {
+      width: 42px; height: 42px;
+      background: rgba(249,115,22,0.12);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .join-info-text h5 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.72rem; font-weight: 700;
+      color: rgba(255,255,255,0.38);
+      text-transform: uppercase; letter-spacing: 0.12em;
+      margin: 0 0 0.2rem;
+    }
+    .join-info-text p { font-size: 0.95rem; color: #fff; margin: 0; line-height: 1.6; }
+
+    .join-cta-card {
+      background: linear-gradient(135deg, rgba(249,115,22,0.14), rgba(245,158,11,0.08));
+      border: 1px solid rgba(249,115,22,0.28);
+      border-radius: 20px;
+      padding: 2.5rem;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.6s 0.15s, transform 0.6s 0.15s;
+    }
+    .join-cta-card.in { opacity: 1; transform: translateY(0); }
+    .join-cta-card h3 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem; }
+    .join-cta-card p { font-size: 0.9rem; color: rgba(255,255,255,0.55); line-height: 1.75; margin-bottom: 1.5rem; }
+
+    
+    footer {
+      background: #111;
+      padding: 2.5rem;
+      text-align: center;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.2);
+    }
+    footer p + p { margin-top: 0.4rem; }
+
+    
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .act-layout { grid-template-columns: 1fr; gap: 2rem; padding: 0 1.5rem; }
+      .act-layout.flip { direction: ltr; }
+      .pillars { grid-template-columns: 1fr; }
+      .faq-grid { grid-template-columns: 1fr; }
+      .join-grid { grid-template-columns: 1fr; }
+      .people-grid { grid-template-columns: repeat(2, 1fr); }
+      
+      .act-img-main { grid-row: auto; aspect-ratio: 4/3; }
+
+      
+      #scene-about { height: auto; }
+      #scene-about .stage {
+        position: relative;
+        height: auto;
+        padding: 5rem 0;
+      }
+      
+      #about-intro,
+      #about-body  { opacity: 1 !important; }
+      .vision-card,
+      .pillar      { opacity: 1 !important; transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  
+  <div id="progress-bar"></div>
+
+  
+  <nav class="site-nav" id="site-nav">
+    <a href="#" class="nav-logo">EMC MYF</a>
+    <ul class="nav-links">
+      <li><a href="#scene-sunday">Schedule</a></li>
+      <li><a href="#scene-about">About</a></li>
+      <li><a href="#scene-activities">Activities</a></li>
+      <li><a href="#scene-people">People</a></li>
+      <li><a href="#scene-newcomer">New Here?</a></li>
+      <li><a href="#scene-join">Join Us</a></li>
+    </ul>
+  </nav>
+
+  
+  <div class="scene" id="scene-hero">
+    <div class="stage">
+      <div id="hero-bg-overlay"></div>
+      <div class="hero-orb hero-orb-1"></div>
+      <div class="hero-orb hero-orb-2"></div>
+
+      <div class="hero-inner" id="hero-content">
+        <p class="hero-eyebrow" id="hero-eyebrow">Emmanuel Methodist Church, PJ</p>
+
+        <h1 class="hero-title" id="hero-title">
+          Methodist<br>Youth<br><span>Fellowship</span>
+        </h1>
+
+        <p class="hero-church" id="hero-church">EMC MYF</p>
+
+        <p class="hero-tagline" id="hero-tagline">
+          More than a programme — a community where young hearts grow together.
+        </p>
+
+        <div class="hero-ctas" id="hero-ctas">
+          <a href="#scene-join" class="btn-warm btn-warm-solid">Join Us</a>
+          <a href="#scene-activities" class="btn-warm btn-warm-ghost">Explore Activities</a>
+        </div>
+      </div>
+
+      <div class="scroll-hint" id="scroll-hint">
+        <span>scroll</span>
+        <span class="scroll-arrow">↓</span>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="scene" id="scene-sunday">
+    <div class="stage">
+      <div class="sunday-inner">
+
+        <div class="sunday-header in" id="sunday-header">
+          <p class="eyebrow">Every Sunday</p>
+          <h2 class="section-h">What happens<br>after service?</h2>
+        </div>
+
+        <div class="tl-item" id="tl-0">
+          <span class="tl-time">Before 11 AM</span>
+          <div class="tl-body">
+            <h4>Gather &amp; Connect</h4>
+            <p>Arrive, grab a seat, and ease into the day with old friends and new faces.</p>
+          </div>
+        </div>
+
+        <div class="tl-item" id="tl-1">
+          <span class="tl-time">11:00 AM</span>
+          <div class="tl-body">
+            <h4>Worship</h4>
+            <p>Come together in song and praise — setting our hearts on God before anything else.</p>
+          </div>
+        </div>
+
+        <div class="tl-item" id="tl-2">
+          <span class="tl-time">11:30 AM</span>
+          <div class="tl-body">
+            <h4>Main Session</h4>
+            <p>Bible study, sharing, outreach, workshops, activities — no two Sundays look the same.</p>
+          </div>
+        </div>
+
+        <div class="tl-item" id="tl-3">
+          <span class="tl-time">12:30 PM</span>
+          <div class="tl-body">
+            <h4>Wrap Up &amp; Lunch</h4>
+            <p>Wind down, reflect, and often head out for lunch together.</p>
+          </div>
+        </div>
+
+        <div class="sunday-note" id="sunday-note">
+          ✦ &nbsp;Every week is different. Every week is a new experience.
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="scene" id="scene-about">
+    <div class="stage">
+      <div class="about-inner">
+
+        <div id="about-intro" class="about-intro">
+          <p class="eyebrow" style="color: var(--orange-light);">Who We Are</p>
+          <h2 class="section-h" style="color: #fff;">About MYF</h2>
+          <p class="about-text">
+            The Methodist Youth Fellowship (MYF) is the youth arm of Emmanuel Methodist Church —
+            a space for young people to come together every Sunday after service. Whether you're
+            exploring faith, building friendships, or looking for a place to belong, MYF is that place.
+          </p>
+        </div>
+
+        <div id="about-body" class="about-body">
+          <div class="vision-card" id="vision-card">
+            <p class="vision-label">Our Vision</p>
+            <p class="vision-quote">
+              "EMCMYF aligns with the Great Commission by becoming mature Christian youths
+              for God's Kingdom and People."
+            </p>
+          </div>
+
+          <div class="pillars">
+            <div class="pillar" id="pillar-0">
+              <div class="pillar-icon">🌱</div>
+              <h3>Grow</h3>
+              <p>Deepening faith and spiritual maturity through discipleship and the Word.</p>
+            </div>
+            <div class="pillar" id="pillar-1">
+              <div class="pillar-icon">🤝</div>
+              <h3>Connect</h3>
+              <p>Building genuine community across schools, backgrounds, and life stages.</p>
+            </div>
+            <div class="pillar" id="pillar-2">
+              <div class="pillar-icon">🌍</div>
+              <h3>Serve</h3>
+              <p>Moving beyond PJ to reach and impact others for God's Kingdom.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="scene" id="scene-activities">
+    <div class="stage">
+
+      
+      <div class="act-dots" id="act-dots">
+        <div class="act-dot" data-i="0"></div>
+        <div class="act-dot" data-i="1"></div>
+        <div class="act-dot" data-i="2"></div>
+        <div class="act-dot" data-i="3"></div>
+        <div class="act-dot" data-i="4"></div>
+        <div class="act-dot" data-i="5"></div>
+        <div class="act-dot" data-i="6"></div>
+      </div>
+
+      
+      <div class="act-shot" id="act-0">
+        <div class="act-header">
+          <p class="eyebrow">What We Do</p>
+          <h2 class="section-h">Something for<br>every Sunday</h2>
+          <p>From worship to outings, workshops to festive celebrations — MYF is never the same place twice.</p>
+        </div>
+      </div>
+
+      
+      <div class="act-shot" id="act-1">
+        <div class="act-layout">
+          <div class="act-text">
+            <p class="eyebrow">Activity 01</p>
+            <h2>Worship</h2>
+            <p>We start most sessions with worship — a time to set our hearts on God before anything else. Whether you play an instrument or just love to sing, you'll find your place here.</p>
+            <div class="act-tags">
+              <span class="tag">Live Music</span>
+              <span class="tag">Praise &amp; Worship</span>
+              <span class="tag">Weekly</span>
+            </div>
+          </div>
+          <div class="act-imgs">
+            <div class="act-img act-img-main"><img src="https://picsum.photos/seed/myf-wsh1/480/640" alt="Worship session"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-wsh2/480/360" alt="Worship"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-wsh3/480/360" alt="Worship"></div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="act-shot" id="act-2">
+        <div class="act-layout flip">
+          <div class="act-text">
+            <p class="eyebrow">Activity 02</p>
+            <h2>Bible Study</h2>
+            <p>Dig deeper into the Word together. Discussion-based, honest, and applicable to everyday life — bringing ancient wisdom to modern questions.</p>
+            <div class="act-tags">
+              <span class="tag">Discussion</span>
+              <span class="tag">Discipleship</span>
+              <span class="tag">Scripture</span>
+            </div>
+          </div>
+          <div class="act-imgs">
+            <div class="act-img act-img-main"><img src="https://picsum.photos/seed/myf-bib1/480/640" alt="Bible Study"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-bib2/480/360" alt="Bible Study"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-bib3/480/360" alt="Bible Study"></div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="act-shot" id="act-3">
+        <div class="act-layout">
+          <div class="act-text">
+            <p class="eyebrow">Activity 03</p>
+            <h2>Outings &amp; Sports</h2>
+            <p>Laser tag, badminton, hiking, pool days — we work hard and play harder. Outings are how we build friendships that last beyond church walls.</p>
+            <div class="act-tags">
+              <span class="tag">Laser Tag</span>
+              <span class="tag">Sports</span>
+              <span class="tag">Community</span>
+              <span class="tag">Fun</span>
+            </div>
+          </div>
+          <div class="act-imgs">
+            <div class="act-img act-img-main"><img src="https://picsum.photos/seed/myf-out1/480/640" alt="Outings"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-out2/480/360" alt="Sports"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-out3/480/360" alt="Fun"></div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="act-shot" id="act-4">
+        <div class="act-layout flip">
+          <div class="act-text">
+            <p class="eyebrow">Activity 04</p>
+            <h2>Workshops</h2>
+            <p>From art and crafts to worship workshops — hands-on sessions that let you discover and develop creative gifts in a faith context.</p>
+            <div class="act-tags">
+              <span class="tag">Art &amp; Crafts</span>
+              <span class="tag">Worship Workshop</span>
+              <span class="tag">Creative</span>
+            </div>
+          </div>
+          <div class="act-imgs">
+            <div class="act-img act-img-main"><img src="https://picsum.photos/seed/myf-wrk1/480/640" alt="Workshop"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-wrk2/480/360" alt="Art"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-wrk3/480/360" alt="Crafts"></div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="act-shot" id="act-5">
+        <div class="act-layout">
+          <div class="act-text">
+            <p class="eyebrow">Activity 05</p>
+            <h2>Forums &amp;<br>Open Discussion</h2>
+            <p>Real conversations about real life — relationships, identity, mental health, faith in the modern world. No judgment. Just honest, open dialogue.</p>
+            <div class="act-tags">
+              <span class="tag">BGR Forum</span>
+              <span class="tag">Open Discussion</span>
+              <span class="tag">Real Talk</span>
+            </div>
+          </div>
+          <div class="act-imgs">
+            <div class="act-img act-img-main"><img src="https://picsum.photos/seed/myf-frm1/480/640" alt="Forum"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-frm2/480/360" alt="Discussion"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-frm3/480/360" alt="Talk"></div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="act-shot" id="act-6">
+        <div class="act-layout flip">
+          <div class="act-text">
+            <p class="eyebrow">Activity 06</p>
+            <h2>Festive<br>Celebrations</h2>
+            <p>Christmas, CNY, Easter, camps — we go all out. These are the moments that turn into stories you carry for years. Everyone is invited to celebrate.</p>
+            <div class="act-tags">
+              <span class="tag">Christmas</span>
+              <span class="tag">CNY</span>
+              <span class="tag">Easter</span>
+              <span class="tag">Camps</span>
+            </div>
+          </div>
+          <div class="act-imgs">
+            <div class="act-img act-img-main"><img src="https://picsum.photos/seed/myf-fes1/480/640" alt="Celebration"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-fes2/480/360" alt="Christmas"></div>
+            <div class="act-img act-img-sm"><img src="https://picsum.photos/seed/myf-fes3/480/360" alt="Easter"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  
+  <section id="scene-people">
+    <div class="container">
+      <p class="eyebrow" style="color: var(--orange-light);">The Faces of MYF</p>
+      <h2 class="section-h" style="color: #fff;">Meet the People</h2>
+      <p style="color: rgba(255,255,255,0.5); max-width: 460px; font-size: 0.95rem; line-height: 1.8;">
+        MYF is shaped by the people in it. Our leaders, counsellors, and council members
+        walk alongside you through every season.
+      </p>
+
+      <div class="people-grid" id="people-grid">
+        <div class="person-card">
+          <div class="person-avatar"><img src="https://picsum.photos/seed/p1/160/160" alt="Person"></div>
+          <p class="person-name">Youth Leader</p>
+          <p class="person-role">MYF Leader</p>
+        </div>
+        <div class="person-card">
+          <div class="person-avatar"><img src="https://picsum.photos/seed/p2/160/160" alt="Person"></div>
+          <p class="person-name">Youth Leader</p>
+          <p class="person-role">MYF Leader</p>
+        </div>
+        <div class="person-card">
+          <div class="person-avatar"><img src="https://picsum.photos/seed/p3/160/160" alt="Person"></div>
+          <p class="person-name">Counsellor</p>
+          <p class="person-role">MYF Counsellor</p>
+        </div>
+        <div class="person-card">
+          <div class="person-avatar"><img src="https://picsum.photos/seed/p4/160/160" alt="Person"></div>
+          <p class="person-name">Council Member</p>
+          <p class="person-role">MYF Council</p>
+        </div>
+        <div class="person-card">
+          <div class="person-avatar"><img src="https://picsum.photos/seed/p5/160/160" alt="Person"></div>
+          <p class="person-name">Council Member</p>
+          <p class="person-role">MYF Council</p>
+        </div>
+        <div class="person-card">
+          <div class="person-avatar"><img src="https://picsum.photos/seed/p6/160/160" alt="Person"></div>
+          <p class="person-name">Council Member</p>
+          <p class="person-role">MYF Council</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <section id="scene-newcomer">
+    <div class="container">
+      <p class="eyebrow">First Time Here?</p>
+      <h2 class="section-h">You'll fit right in.</h2>
+      <p style="color: var(--text-muted); max-width: 460px; font-size: 0.95rem; line-height: 1.8;">
+        Every person in MYF was once new. Here's everything you need — which is honestly not much.
+      </p>
+
+      <div class="faq-grid" id="faq-grid">
+        <div class="faq-card">
+          <p class="faq-q">Will I know anyone?</p>
+          <p class="faq-a-title">Don't worry — we all started that way.</p>
+          <p class="faq-a-body">Most of us walked in not knowing a single person. MYF is a welcoming bunch — someone will find you before you even start looking.</p>
+        </div>
+        <div class="faq-card">
+          <p class="faq-q">What should I bring?</p>
+          <p class="faq-a-title">Just yourself.</p>
+          <p class="faq-a-body">No Bible, no notebook, no prep needed. Come as you are, with an open heart — that's genuinely all you need.</p>
+        </div>
+        <div class="faq-card">
+          <p class="faq-q">Do I need to prepare anything?</p>
+          <p class="faq-a-title">Nope. Just show up.</p>
+          <p class="faq-a-body">No homework, no prior knowledge required. Just join in and enjoy the experience. We figure the rest out together.</p>
+        </div>
+        <div class="faq-card">
+          <p class="faq-q">Is it only for church members?</p>
+          <p class="faq-a-title">Everyone is welcome here.</p>
+          <p class="faq-a-body">Whether you're a regular churchgoer, curious about faith, or just tagged along with a friend — MYF is open to all. Come as you are.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <section id="scene-join">
+    <div class="container">
+      <p class="eyebrow" style="color: var(--orange-light);">Come Find Us</p>
+      <h2 class="section-h" style="color: #fff;">We'd love to<br>have you.</h2>
+
+      <div class="join-grid">
+        <div id="join-info">
+          <div class="join-info-item">
+            <div class="join-icon">📅</div>
+            <div class="join-info-text">
+              <h5>When</h5>
+              <p>Every Sunday<br>From 10:45 AM onwards</p>
+            </div>
+          </div>
+          <div class="join-info-item">
+            <div class="join-icon">📍</div>
+            <div class="join-info-text">
+              <h5>Where</h5>
+              <p>Emmanuel Methodist Church<br>Petaling Jaya, Selangor</p>
+            </div>
+          </div>
+          <div class="join-info-item">
+            <div class="join-icon">👥</div>
+            <div class="join-info-text">
+              <h5>Who Can Join</h5>
+              <p>Youth ages 13–30<br>All are welcome regardless of background</p>
+            </div>
+          </div>
+          <div class="join-info-item">
+            <div class="join-icon">💬</div>
+            <div class="join-info-text">
+              <h5>Contact</h5>
+              <p>Reach out via WhatsApp<br>or drop by after Sunday service</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="join-cta-card" id="join-cta">
+          <h3>Ready to take the first step?</h3>
+          <p>
+            The best way to understand MYF is to experience it. Come this Sunday —
+            we'll be looking out for you, and we'll make it worth showing up.
+          </p>
+          <a href="#" class="btn-warm btn-warm-solid">Get in Touch</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <footer>
+    <p>Methodist Youth Fellowship &nbsp;·&nbsp; Emmanuel Methodist Church &nbsp;·&nbsp; Petaling Jaya</p>
+    <p>Built with love by MYF ✦</p>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+    function map(v, inLo, inHi, outLo, outHi) {
+      return outLo + (outHi - outLo) * clamp((v - inLo) / (inHi - inLo), 0, 1);
+    }
+    
+    function sceneProgress(el) {
+      const top = el.getBoundingClientRect().top;
+      const scrollable = el.offsetHeight - window.innerHeight;
+      return clamp(-top / scrollable, 0, 1);
+    }
+
+    
+    const heroScene   = document.getElementById('scene-hero');
+    const sundayScene = document.getElementById('scene-sunday');
+    const aboutScene  = document.getElementById('scene-about');
+    const actScene    = document.getElementById('scene-activities');
+
+    const progressBar   = document.getElementById('progress-bar');
+    const siteNav       = document.getElementById('site-nav');
+    const heroBgOverlay = document.getElementById('hero-bg-overlay');
+
+    const heroContent = document.getElementById('hero-content');
+    const heroEyebrow = document.getElementById('hero-eyebrow');
+    const heroTitle   = document.getElementById('hero-title');
+    const heroChurch  = document.getElementById('hero-church');
+    const heroTagline = document.getElementById('hero-tagline');
+    const heroCtas    = document.getElementById('hero-ctas');
+    const scrollHint  = document.getElementById('scroll-hint');
+
+    const sundayHeader = document.getElementById('sunday-header');
+    const tlItems = [0,1,2,3].map(i => document.getElementById('tl-' + i));
+    const sundayNote   = document.getElementById('sunday-note');
+
+    const aboutIntro  = document.getElementById('about-intro');
+    const aboutBody   = document.getElementById('about-body');
+    const visionCard  = document.getElementById('vision-card');
+    const pillars     = [0,1,2].map(i => document.getElementById('pillar-' + i));
+
+    const actShots = [0,1,2,3,4,5,6].map(i => document.getElementById('act-' + i));
+    const actDots  = document.querySelectorAll('.act-dot');
+
+    let heroTriggered = false;
+
+    
+    function update() {
+      const scrollY = window.scrollY;
+      const docH    = document.body.scrollHeight - window.innerHeight;
+
+      progressBar.style.width = (scrollY / docH * 100) + '%';
+
+      siteNav.classList.toggle('scrolled', scrollY > 60);
+
+      
+      const hp = sceneProgress(heroScene);
+
+      if (!heroTriggered && scrollY >= 0) {
+        heroTriggered = true;
+        setTimeout(() => heroEyebrow.classList.add('in'), 150);
+        setTimeout(() => heroTitle.classList.add('in'),   300);
+        setTimeout(() => heroChurch.classList.add('in'),  450);
+        setTimeout(() => heroTagline.classList.add('in'), 580);
+        setTimeout(() => heroCtas.classList.add('in'),    700);
+        setTimeout(() => scrollHint.classList.add('in'), 1200);
+      }
+
+      heroBgOverlay.style.opacity = String(map(hp, 0.6, 0.9, 0, 1));
+      console.log("hp", hp, "map", map(hp, 0.8, 1, 0, 10));
+
+      if (hp > 0.25) {
+        const ex = map(hp, 0.25, 0.65, 0, 1);
+        heroContent.style.opacity   = String(1 - ex);
+        heroContent.style.filter   = `blur(${map(hp, 0.25, 0.65, 0, 10)}px)`;
+        heroContent.style.transform = `translateY(${-ex * 56}px) scale(${map(hp, 0.25, 0.65, 1, 5)})`;
+        scrollHint.style.opacity    = '0';
+      } else {
+        heroContent.style.opacity   = '';
+        heroContent.style.transform = '';
+      }
+
+      
+      const sp = sceneProgress(sundayScene);
+      sp > 0.16 ? tlItems[0].classList.add('in') : tlItems[0].classList.remove('in');
+      sp > 0.30 ? tlItems[1].classList.add('in') : tlItems[1].classList.remove('in');
+      sp > 0.44 ? tlItems[2].classList.add('in') : tlItems[2].classList.remove('in');
+      sp > 0.58 ? tlItems[3].classList.add('in') : tlItems[3].classList.remove('in');
+      sp > 0.72 ? sundayNote.classList.add('in') : sundayNote.classList.remove('in');
+
+      
+      if (window.innerWidth > 768) {
+        const ap = sceneProgress(aboutScene);
+        aboutIntro.style.opacity  = String(map(ap, 0.04, 0.22, 0, 1));
+        aboutBody.style.opacity   = String(map(ap, 0.22, 0.4, 0, 1));
+        ap > 0.22 ? visionCard.classList.add('in') : visionCard.classList.remove('in');
+        if (ap > 0.45) {
+          pillars.forEach((p, i) => setTimeout(() => p.classList.add('in'), i * 120));
+        } else {
+          pillars.forEach(p => p.classList.remove('in'));
+        }
+      }
+
+      
+      const actp     = sceneProgress(actScene);
+      const numShots = actShots.length;
+      const shotIdx  = Math.min(Math.floor(actp * numShots), numShots - 1);
+
+      actShots.forEach((shot, i) => shot.classList.toggle('active', i === shotIdx));
+      actDots.forEach((dot, i)   => dot.classList.toggle('active',  i === shotIdx));
+    }
+
+    
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const id = entry.target.id;
+
+        if (id === 'people-grid') {
+          document.querySelectorAll('.person-card').forEach((c, i) =>
+            setTimeout(() => c.classList.add('in'), i * 80));
+        }
+        if (id === 'faq-grid') {
+          document.querySelectorAll('.faq-card').forEach((c, i) =>
+            setTimeout(() => c.classList.add('in'), i * 100));
+        }
+        if (id === 'join-info') {
+          document.querySelectorAll('.join-info-item').forEach((c, i) =>
+            setTimeout(() => c.classList.add('in'), i * 110));
+        }
+        if (id === 'join-cta') {
+          entry.target.classList.add('in');
+        }
+      });
+    }, { threshold: 0.18 });
+
+    ['people-grid', 'faq-grid', 'join-info', 'join-cta'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+
+    
+    let snapTimer = null;
+
+    function snapToNearestShot() {
+      const actp = sceneProgress(actScene);
+      if (actp <= 0 || actp >= 1) return;          // outside the scene — leave alone
+
+      const numShots = actShots.length;
+      const nearest  = Math.max(0, Math.min(numShots - 1, Math.round(actp * numShots)));
+      const targetP  = nearest / numShots;
+      const scrollable = actScene.offsetHeight - window.innerHeight;
+      const targetY  = actScene.offsetTop + targetP * scrollable;
+
+      if (Math.abs(window.scrollY - targetY) > 4) {
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+      }
+    }
+
+    if ('onscrollend' in window) {
+      window.addEventListener('scrollend', snapToNearestShot);
+    } else {
+      window.addEventListener('scroll', () => {
+        clearTimeout(snapTimer);
+        snapTimer = setTimeout(snapToNearestShot, 140);
+      }, { passive: true });
+    }
+
+    
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  </script>
+
+</body>
+</html>

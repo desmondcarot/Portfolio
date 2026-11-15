@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f4">
+  <title>YouthQuake | Camp administration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#dashboard" aria-label="YouthQuake dashboard">
+        <span class="brand-mark"><i class="bi bi-lightning-charge-fill"></i></span>
+        <span><strong>YOUTHQUAKE<span class="brand-dot">.</span></strong><small>ADMIN PORTAL</small></span>
+      </a>
+      <div class="camp-label">CAMP WORKSPACE</div>
+      <nav class="nav-menu">
+        <a href="#dashboard" class="nav-link" data-page="dashboard"><i class="bi bi-grid-1x2"></i> Overview</a>
+        <a href="#check-in" class="nav-link" data-page="check-in"><i class="bi bi-person-check"></i> Check-in desk <span class="nav-badge">LIVE</span></a>
+        <a href="#participants" class="nav-link" data-page="participants"><i class="bi bi-people"></i> Participants</a>
+        <a href="#devotion-groups" class="nav-link" data-page="devotion-groups"><i class="bi bi-book"></i> Devotion groups</a>
+        <a href="#team-groups" class="nav-link" data-page="team-groups"><i class="bi bi-diagram-3"></i> Team-building groups</a>
+        <a href="#workshops" class="nav-link" data-page="workshops"><i class="bi bi-calendar3"></i> Workshops</a>
+        <a href="#phone-returns" class="nav-link" data-page="phone-returns"><i class="bi bi-phone"></i> Phone returns</a>
+        <a href="#activity" class="nav-link" data-page="activity"><i class="bi bi-clock-history"></i> Activity log</a>
+        <a href="#reports" class="nav-link" data-page="reports"><i class="bi bi-bar-chart-line"></i> Reports</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-note">
+          <div class="note-icon"><i class="bi bi-stars"></i></div>
+          <strong>Made for camp days</strong>
+          <p>Less paperwork, more time for people.</p>
+        </div>
+        <div class="sidebar-user"><span class="avatar dark">AD</span><span><strong>Admin team</strong><small>Camp workspace</small></span><i class="bi bi-three-dots ms-auto"></i></div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="breadcrumb-text">WORKSPACE <i class="bi bi-chevron-right"></i> <span id="breadcrumb">Overview</span></div>
+        <div class="topbar-right"><span class="demo-pill"><span></span> DEMO WORKSPACE</span><span class="top-divider"></span><span class="top-date" id="today"></span><span class="avatar top-avatar">AD</span></div>
+      </header>
+      <div class="mobile-nav" aria-label="Mobile navigation">
+        <a href="#dashboard" data-page="dashboard">Overview</a><a href="#check-in" data-page="check-in">Check-in</a><a href="#participants" data-page="participants">Participants</a><a href="#devotion-groups" data-page="devotion-groups">Devotion groups</a><a href="#team-groups" data-page="team-groups">Team-building groups</a><a href="#workshops" data-page="workshops">Workshops</a><a href="#phone-returns" data-page="phone-returns">Phone returns</a><a href="#activity" data-page="activity">Activity log</a><a href="#reports" data-page="reports">Reports</a>
+      </div>
+      <div class="page-content">
+        <div class="demo-banner"><i class="bi bi-info-circle"></i><span><strong>You're exploring a demo.</strong> All participants are fictional. Changes are saved only in this browser.</span><button type="button" id="reset-demo">Reset demo</button></div>
+
+        <section id="dashboard" class="page" aria-labelledby="dashboard-title">
+          <div class="page-heading">
+            <div><div class="eyebrow"><span class="eyebrow-dot"></span> CAMP ADMINISTRATION</div><h1 id="dashboard-title">Good to have you here<span class="heading-dot">.</span></h1><p>Here's what's happening at your camp registration desk.</p></div>
+            <a class="btn-primary-custom" href="#check-in"><i class="bi bi-plus-lg"></i> Start check-in</a>
+          </div>
+          <div class="overview-grid">
+            <div class="stat-card"><div class="stat-top"><span>REGISTERED</span><span class="stat-icon purple"><i class="bi bi-people"></i></span></div><strong id="stat-total">0</strong><div class="stat-caption"><span class="caption-dot purple-dot"></span> Total participants</div></div>
+            <div class="stat-card"><div class="stat-top"><span>CHECKED IN</span><span class="stat-icon green"><i class="bi bi-person-check"></i></span></div><strong id="stat-checked">0</strong><div class="stat-caption"><span class="caption-dot green-dot"></span> Ready for camp</div></div>
+            <div class="stat-card"><div class="stat-top"><span>YET TO ARRIVE</span><span class="stat-icon orange"><i class="bi bi-clock"></i></span></div><strong id="stat-pending">0</strong><div class="stat-caption"><span class="caption-dot orange-dot"></span> Awaiting check-in</div></div>
+            <div class="stat-card"><div class="stat-top"><span>PHONES IN CUSTODY</span><span class="stat-icon blue"><i class="bi bi-phone"></i></span></div><strong id="stat-phones">0</strong><div class="stat-caption"><span class="caption-dot blue-dot"></span> Safely recorded</div></div>
+          </div>
+          <div class="dashboard-grid">
+            <div class="panel arrivals-panel">
+              <div class="panel-header"><div><div class="section-kicker">REGISTRATION DESK</div><h2>Participant overview</h2><p>A quick look at who's on the list.</p></div><a class="text-link" href="#participants">View all <i class="bi bi-arrow-right"></i></a></div>
+              <div class="table-wrap"><table class="data-table"><thead><tr><th>PARTICIPANT</th><th>CHURCH</th><th>STATUS</th><th></th></tr></thead><tbody id="overview-table"></tbody></table></div>
+            </div>
+            <div class="right-stack">
+              <div class="panel progress-panel"><div class="section-kicker">AT A GLANCE</div><h2>Check-in progress</h2><p>Every arrival counts.</p><div class="progress-number"><strong id="progress-percent">0%</strong><span>checked in</span></div><div class="progress-track"><div id="progress-bar"></div></div><div class="progress-labels"><span id="progress-count">0 of 0 participants</span><span>100%</span></div><div class="progress-tip"><i class="bi bi-lightbulb"></i><span>Use the check-in desk to find a participant and work through their arrival checklist.</span></div></div>
+              <div class="help-card"><div class="help-sparkle"><i class="bi bi-stars"></i></div><div class="section-kicker">A LITTLE REMINDER</div><h2>You're making<br>camp happen.</h2><p>One warm welcome at a time.</p><span class="help-arrow"><i class="bi bi-arrow-up-right"></i></span></div>
+            </div>
+          </div>
+          <div class="footer-line"><span>YOUTHQUAKE ADMIN <span>✦</span> BUILT FOR THE MOMENTS THAT MATTER</span><span>DEMO VERSION</span></div>
+        </section>
+
+        <section id="check-in" class="page" hidden aria-labelledby="checkin-title">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span> REGISTRATION DESK</div><h1 id="checkin-title">Let's get them checked in<span class="heading-dot">.</span></h1><p>Find a participant, then work through their arrival checklist.</p></div></div>
+          <div class="desk-layout">
+            <div class="panel desk-list"><div class="panel-header compact"><div><div class="section-kicker">FIND A PARTICIPANT</div><h2>Who's arriving?</h2></div><span class="count-pill" id="desk-count"></span></div><label class="search-box"><i class="bi bi-search"></i><span class="visually-hidden">Search participants for check-in</span><input id="desk-search" type="search" placeholder="Search name or church..."><span class="search-hint">SEARCH</span></label><div id="desk-results" class="desk-results"></div></div>
+            <div class="panel detail-panel" id="detail-panel"></div>
+          </div>
+        </section>
+
+        <section id="participants" class="page" hidden aria-labelledby="participants-title">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span> THE CAMP COMMUNITY</div><h1 id="participants-title">Everyone, in one place<span class="heading-dot">.</span></h1><p>Browse the participant list and open a profile at the check-in desk.</p></div><a class="btn-secondary-custom" href="#reports"><i class="bi bi-download"></i> Export list</a></div>
+          <div class="panel"><div class="panel-header"><div><div class="section-kicker">PARTICIPANT DIRECTORY</div><h2>Participant list <span class="count-pill" id="participant-count"></span></h2><p>Fictional data for demonstration purposes.</p></div></div><div class="directory-controls"><label class="search-box directory-search"><i class="bi bi-search"></i><span class="visually-hidden">Search participant directory</span><input id="participant-search" type="search" placeholder="Search name or church..."></label><label class="visually-hidden" for="status-filter">Filter by status</label><select id="status-filter" class="filter-select"><option value="all">All statuses</option><option value="checked">Checked in</option><option value="pending">Yet to arrive</option><option value="attention">Needs attention</option></select></div><div class="table-wrap"><table class="data-table directory-table"><thead><tr><th>PARTICIPANT</th><th>CHURCH</th><th>SHIRT</th><th>DEVOTION GROUP</th><th>STATUS</th><th></th></tr></thead><tbody id="participants-table"></tbody></table></div></div>
+        </section>
+
+        <section id="devotion-groups" class="page" hidden aria-labelledby="devotion-title">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span> CAMP COMMUNITY</div><h1 id="devotion-title">Devotion groups<span class="heading-dot">.</span></h1><p>Explore each group and see who's sharing the journey.</p></div></div>
+          <div class="groups-intro"><div><div class="section-kicker">GROUP DIRECTORY</div><h2>Find your group</h2><p>Select a group to view its participants and check-in status.</p></div><span class="count-pill" id="devotion-summary"></span></div>
+          <div id="devotion-group-list" class="group-list"></div>
+        </section>
+
+        <section id="team-groups" class="page" hidden aria-labelledby="team-title">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span> CAMP COMMUNITY</div><h1 id="team-title">Team-building groups<span class="heading-dot">.</span></h1><p>See who's teaming up for camp activities.</p></div></div>
+          <div class="groups-intro"><div><div class="section-kicker">GROUP DIRECTORY</div><h2>Meet the teams</h2><p>Select a group to view its participants and check-in status.</p></div><span class="count-pill" id="team-summary"></span></div>
+          <div id="team-group-list" class="group-list"></div>
+        </section>
+
+        <section id="workshops" class="page" hidden aria-labelledby="workshops-title">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span> CAMP PROGRAMME</div><h1 id="workshops-title">Workshop rosters<span class="heading-dot">.</span></h1><p>See who signed up for each workshop, day by day.</p></div></div>
+          <div class="groups-intro"><div><div class="section-kicker">WORKSHOP DIRECTORY</div><h2>Choose a day</h2><p>Open a workshop to see its participants and arrival status.</p></div><label class="visually-hidden" for="workshop-day">Workshop day</label><select id="workshop-day" class="filter-select"><option value="0">Day 1</option><option value="1">Day 2</option><option value="2">Day 3</option></select></div>
+          <div id="workshop-list" class="group-list"></div>
+        </section>
+
+        <section id="phone-returns" class="page" hidden aria-labelledby="phone-returns-title">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span> PHONE CUSTODY</div><h1 id="phone-returns-title">Returning phones<span class="heading-dot">.</span></h1><p>Find a collected phone, confirm its location and record its return.</p></div></div>
+          <div class="panel"><div class="panel-header"><div><div class="section-kicker">CUSTODY REGISTER</div><h2>Collected phones <span class="count-pill" id="phone-count"></span></h2><p>Verify the participant and phone before marking it returned.</p></div></div>
+            <div class="directory-controls"><label class="search-box directory-search"><i class="bi bi-search"></i><span class="visually-hidden">Search phone custody</span><input id="phone-search" type="search" placeholder="Search name, ID, church or location..."></label><label class="visually-hidden" for="phone-filter">Filter phone status</label><select id="phone-filter" class="filter-select"><option value="all">All collected phones</option><option value="custody">In custody</option><option value="returned">Returned</option></select></div>
+            <div class="table-wrap"><table class="data-table"><thead><tr><th>PARTICIPANT</th><th>PHONE</th><th>LOCATION</th><th>COLLECTED</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="phone-table"></tbody></table></div>
+          </div>
+        </section>
+
+        <section id="activity" class="page" hidden aria-labelledby="activity-title">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span> CAMP WORKSPACE</div><h1 id="activity-title">Activity log<span class="heading-dot">.</span></h1><p>Recent check-in, follow-up and phone custody changes on this browser.</p></div></div>
+          <div class="panel"><div class="panel-header"><div><div class="section-kicker">RECENT ACTIVITY</div><h2>Workspace history <span class="count-pill" id="activity-count"></span></h2><p>Actions are not attributed to staff. Only the latest 500 events are kept on this device.</p></div></div>
+            <div class="directory-controls"><label class="search-box directory-search"><i class="bi bi-search"></i><span class="visually-hidden">Search activity</span><input id="activity-search" type="search" placeholder="Search participant, ID or action..."></label><label class="visually-hidden" for="activity-filter">Filter activity type</label><select id="activity-filter" class="filter-select"><option value="all">All activity</option><option value="check-in">Check-in</option><option value="checklist">Checklist & follow-up</option><option value="phone">Phone custody</option><option value="workspace">Workspace</option></select></div>
+            <div class="table-wrap"><table class="data-table"><thead><tr><th>TIME</th><th>PARTICIPANT</th><th>ACTION</th><th></th></tr></thead><tbody id="activity-table"></tbody></table></div>
+          </div>
+        </section>
+
+        <section id="reports" class="page" hidden aria-labelledby="reports-title">
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-dot"></span> CAMP INSIGHTS</div><h1 id="reports-title">The details, all together<span class="heading-dot">.</span></h1><p>Download a snapshot of the demo data whenever you need it.</p></div></div>
+          <div class="report-grid">
+            <div class="panel report-card"><span class="report-icon purple"><i class="bi bi-file-earmark-person"></i></span><div class="section-kicker">PARTICIPANT DIRECTORY</div><h2>Participant report</h2><p>Participant details, three days of workshop choices, groups and check-in status.</p><button class="btn-secondary-custom" type="button" id="export-participants"><i class="bi bi-download"></i> Download CSV</button></div>
+            <div class="panel report-card"><span class="report-icon blue"><i class="bi bi-phone"></i></span><div class="section-kicker">PHONE CUSTODY</div><h2>Phone custody report</h2><p>Phones marked as received, with their recorded description and storage location.</p><button class="btn-secondary-custom" type="button" id="export-phones"><i class="bi bi-download"></i> Download CSV</button></div>
+          </div>
+          <div class="report-note"><i class="bi bi-shield-check"></i><div><strong>A note on privacy</strong><p>Reports can contain sensitive personal information. This prototype is for fictional data only and is not suitable for real participant records.</p></div></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div class="toast-message" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

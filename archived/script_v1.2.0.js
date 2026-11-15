@@ -265,11 +265,6 @@ navLogo.addEventListener('click', (e) => {
     
     if (logoClickCount === 3) {
         const messages = [
-            '<i class="fas fa-info-circle"></i> Portfolio by Desmond Ong',
-            '<i class="fas fa-code"></i> Built with HTML, CSS, JavaScript',
-            '<i class="fas fa-palette"></i> 90s Apple + Modern Design',
-            '<i class="fas fa-check"></i> Thanks for visiting',
-            '<i class="fas fa-star"></i> Achievement: Explorer'
         ];
         
         const bubble = document.createElement('div');
